@@ -20,6 +20,8 @@ var fs = require('fs');
 var eslintConfigJs = JSON.parse(fs.readFileSync('./.eslintrc'));
 var env = require('gulp-env');
 var mocha = require('gulp-mocha');
+var argv = require('yargs').argv;
+var dest = argv.dest || '../../build/framework/';
 
 webpackDevConfig.output.filename = 'skoash.' + appPackage.version + '.js';
 webpackProdConfig.output.filename = 'skoash.' + appPackage.version + '.js';
@@ -83,8 +85,7 @@ buildDevelopment = function () {
     });
     return gulp.src('./src/app.js')
         .pipe(wpStream)
-        .pipe(gulp.dest('./build'))
-        .pipe(gulp.dest('../cmwn-games/library/framework'));
+        .pipe(gulp.dest(dest));
 };
 
 buildProduction = function () {
@@ -118,8 +119,7 @@ buildProduction = function () {
     // run webpack
     return gulp.src('./src/app.js')
         .pipe(wpStream)
-        .pipe(gulp.dest('./build'))
-        .pipe(gulp.dest('../cmwn-games/library/framework'));
+        .pipe(gulp.dest(dest));
 };
 
 selectBuildMode = function () {
