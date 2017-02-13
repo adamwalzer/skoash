@@ -8,7 +8,6 @@ var selectBuildMode;
 /*eslint-env node */
 /*eslint no-console:0 */
 var gulp = require('gulp');
-var args = require('yargs').argv;
 var gutil = require('gulp-util');
 var webpack = require('webpack');
 var gulpWebpack = require('webpack-stream');
@@ -34,9 +33,9 @@ require('babel-core/register');//for mocha to use es6
 // APP_ENV environment variable
 // NODE_ENV environment variable
 getMode = function (m = 'production') {
-    if (args.development || args.dev) {
+    if (argv.development || argv.dev) {
         m = 'development';
-    } else if (args.prod || args.production) {
+    } else if (argv.prod || argv.production) {
         m = 'production';
     } else if (process.env.APP_ENV) {
         m = process.env.APP_ENV;
