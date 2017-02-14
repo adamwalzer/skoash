@@ -11,7 +11,7 @@ class MediaCollection extends Component {
     componentWillReceiveProps(props) {
         super.componentWillReceiveProps(props);
 
-        if (props.play && props.play !== this.props.play) {
+        if (props.play != null && props.play !== false && props.play !== this.props.play) {
             props.play.split(' ').forEach(this.play.bind(this));
         }
     }
