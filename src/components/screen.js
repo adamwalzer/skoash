@@ -195,16 +195,12 @@ class Screen extends Component {
 
     renderPrevButton() {
         if (this.props.hidePrev) return null;
-        return (
-            <button className="prev-screen" onClick={this.prev} />
-        );
+        return this.props.renderPrevButton.call(this);
     }
 
     renderNextButton() {
         if (this.props.hideNext) return null;
-        return (
-            <button className="next-screen" onClick={this.next} />
-        );
+        return this.props.renderNextButton.call(this);
     }
 
     render() {
@@ -229,6 +225,18 @@ Screen.defaultProps = _.defaults({
     onUnload: _.noop,
     shouldUnload: true,
     gameState: {},
+    hidePrev: false,
+    hideNext: false,
+    renderPrevButton: function () {
+        return (
+            <button className="prev-screen" onClick={this.prev}>
+                {this.props.prevContent}
+            </button>
+        );
+    },
+    renderNextButton: function () {
+        return <button className="next-screen" onClick={this.next} />;
+    }
 }, Component.defaultProps);
 
 export default Screen;
