@@ -8,7 +8,7 @@ class Asset extends Component {
     constructor(props) {
         super(props);
 
-        this.state.ready = false;
+        this.state.ready = props.ready;
 
         this.error = this.error.bind(this);
     }
@@ -16,7 +16,7 @@ class Asset extends Component {
     error() {
         this.setState({
             error: true,
-            ready: false
+            ready: this.props.ready
         }, () => {
             this.props.onError.call(this);
         });
@@ -27,6 +27,7 @@ Asset.defaultProps = _.defaults({
     checkComplete: false,
     checkReady: false,
     onError: _.noop,
+    ready: false,
 }, Component.defaultProps);
 
 export default Asset;
