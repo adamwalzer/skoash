@@ -306,11 +306,11 @@ class Game extends Component {
     render() {
         return (
             <div className={this.getClassNames()} style={this.getStyles()}>
-                {this.renderContentList('loader')}
                 {this.renderContentList('assets')}
                 {this.props.renderMenu.call(this)}
                 {this.renderScreens()}
                 {this.renderMenuScreens()}
+                {this.renderContentList('loader')}
             </div>
         );
     }
