@@ -91,9 +91,9 @@ class Navigator {
         // this should only be dropped into for non-linear screens
         if (!newScreen.state.load || !newScreen.state.ready) {
             this.loadScreens(currentScreenIndex);
-        } else {
-            newScreen.open(opts);
         }
+
+        newScreen.open(opts);
 
         screenIndexArray.push(currentScreenIndex);
 
