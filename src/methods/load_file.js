@@ -1,6 +1,6 @@
-export default function (file, callback) {
-    let xobj;
+require('isomorphic-fetch');
 
+export default function (file, callback, responseType = 'text') {
     if (!skoash) skoash = {};
     if (!skoash._cache) skoash._cache = {};
 
@@ -9,20 +9,15 @@ export default function (file, callback) {
         return;
     }
 
-    xobj = new XMLHttpRequest();
-    xobj.overrideMimeType('application/json');
-    xobj.open('GET', file, true);
-    xobj.onreadystatechange = function () {
-        /* eslint-disable eqeqeq */
-        if (xobj.readyState == 4) {
-            if (xobj.status == '200') {
-                skoash._cache[file] = xobj.responseText;
-                callback(xobj.responseText);
+    fetch(file)
+    .then(response => {
+        _.invoke(response, responseType).then(text => {
+            if (response.status === 200) {
+                skoash._cache[file] = text;
+                callback(text);
             } else {
-                console.log('Error', xobj.statusText); // eslint-disable-line no-console
+                console.log('Error', text); // eslint-disable-line no-console
             }
-        }
-        /* eslint-enable eqeqeq */
-    };
-    xobj.send(null);
+        });
+    });
 }
