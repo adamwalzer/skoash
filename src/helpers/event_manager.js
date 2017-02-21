@@ -16,11 +16,9 @@ class EventManager {
         window.addEventListener('orientationchange', () => {
             window.dispatchEvent(new Event('resize'));
         });
-        if (window.parent) {
-            window.parent.addEventListener('orientationchange', () => {
-                window.dispatchEvent(new Event('orientationchange'));
-            });
-        }
+        _.invoke(window, 'parent.addEventListener', 'orientationchange', () => {
+            window.dispatchEvent(new Event('orientationchange'));
+        });
 
         window.addEventListener('keydown', e => {
             this.eventManager.onKeyDown(e);
