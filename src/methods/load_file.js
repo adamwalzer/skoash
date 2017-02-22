@@ -1,11 +1,10 @@
 require('isomorphic-fetch');
 
-export default function (file, callback, responseType = 'text') {
-    if (!skoash) skoash = {};
-    if (!skoash._cache) skoash._cache = {};
+let _cache = {};
 
-    if (skoash._cache[file]) {
-        callback(skoash._cache[file]);
+export default function (file, callback, responseType = 'text') {
+    if (_cache[file]) {
+        callback(_cache[file]);
         return;
     }
 
@@ -13,7 +12,7 @@ export default function (file, callback, responseType = 'text') {
     .then(response => {
         _.invoke(response, responseType).then(text => {
             if (response.status === 200) {
-                skoash._cache[file] = text;
+                _cache[file] = text;
                 callback(text);
             } else {
                 console.log('Error', text); // eslint-disable-line no-console
