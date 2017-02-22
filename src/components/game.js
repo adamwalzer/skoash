@@ -284,7 +284,10 @@ class Game extends Component {
             props.data = this.state.data.screens[key];
             props.gameState = this.state;
             props.index = index;
-            if (_.isNumber(_.parseInt(key)) && Math.abs(this.state.currentScreenIndex - index) > 5) {
+            if (
+                _.isNumber(_.parseInt(key)) &&
+                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBeforeAndAfter
+            ) {
                 return null;
             }
             return this.props.screens[key](props, 'screen-' + key, key);
@@ -320,6 +323,7 @@ Game.defaultProps = _.defaults({
     componentName: 'skoash-game',
     getBackgroundIndex: () => 0,
     passData: _.noop,
+    screenBeforeAndAfter: 5,
     screens: {
         0: function (props, ref, key) {
             return (
