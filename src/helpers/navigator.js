@@ -103,7 +103,7 @@ class Navigator {
     closeOldScreen(oldScreen, newScreen, opts, oldIndex) {
         var back = oldScreen.props.index > newScreen.props.index;
         var buttonSound;
-        var data = _.cloneDeep(this.state.data);
+        var data = this.state.data;
 
         if (!oldScreen || oldScreen === newScreen) return data;
 
