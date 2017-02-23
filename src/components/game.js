@@ -288,7 +288,13 @@ class Game extends Component {
                 _.isNumber(_.parseInt(key)) &&
                 Math.abs(this.state.currentScreenIndex - index) > this.props.screenBeforeAndAfter
             ) {
-                return null;
+                return (
+                    <Screen
+                        {...props}
+                        ref={'screen-' + key}
+                        key={key}
+                    />
+                );
             }
             return this.props.screens[key](props, 'screen-' + key, key);
         });
