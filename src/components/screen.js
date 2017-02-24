@@ -245,8 +245,14 @@ Screen.defaultProps = _.defaults({
         );
     },
     renderNextButton: function () {
-        return <button className="next-screen" onClick={this.next} />;
-    }
+        return (
+            <button className="next-screen" onClick={this.prev}>
+                {this.props.nextContent}
+            </button>
+        );
+    },
+    prevContent: null,
+    nextContent: null,
 }, Component.defaultProps);
 
 export default Screen;
