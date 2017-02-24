@@ -1,4 +1,4 @@
-import loadFile from './load_file.js';
+import loadFile from './load_file';
 
 export default function (file, callback) {
     loadFile(file, data => {
