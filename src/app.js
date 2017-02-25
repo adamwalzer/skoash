@@ -25,6 +25,7 @@ import ScrollArea from 'components/scroll_area';
 import Selectable from 'components/selectable';
 import Slider from 'components/slider';
 import Sprite from 'components/sprite';
+import SpriteCSS from 'components/sprite_css';
 import SpriteAnimation from 'components/sprite_animation';
 import Timer from 'components/timer';
 
@@ -66,6 +67,7 @@ window.$k = window.skoash = {
     Selectable,
     Slider,
     Sprite,
+    SpriteCSS,
     SpriteAnimation,
     Timer,
     // new data components
