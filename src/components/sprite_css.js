@@ -60,6 +60,7 @@ class SpriteCss extends Component {
             <JSON
                 ref="json"
                 src={`${this.props.dataSrc || this.props.src}.${this.props.dataExtension}`}
+                dataTarget={this.props.dataTarget}
                 onReady={this.onJSONReady}
             />
         );

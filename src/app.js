@@ -12,6 +12,7 @@ import MediaSequence from 'components/media_sequence';
 import ListItem from 'components/list_item';
 
 // new components
+import Animation from 'components/animation';
 import DPad from 'components/d_pad';
 import GameEmbedder from 'components/game_embedder';
 import InteractiveItem from 'components/interactive_item';
@@ -54,6 +55,7 @@ window.$k = window.skoash = {
     MediaSequence,
     ListItem,
     // new components
+    Animation,
     DPad,
     GameEmbedder,
     InteractiveItem,

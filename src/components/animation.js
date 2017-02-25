@@ -1,7 +1,6 @@
 import classNames from 'classnames';
 
 import Component from 'components/component';
-import SpriteCss from 'components/sprite_css';
 
 class Animation extends Component {
     constructor(props) {
@@ -9,6 +8,7 @@ class Animation extends Component {
 
         this.state = _.defaults({
             frame: props.frame,
+            frameRates: [],
         }, this.state);
 
         this.lastAnimation = Date.now();
@@ -16,9 +16,15 @@ class Animation extends Component {
         this.setUp = this.setUp.bind(this);
     }
 
+    bootstrap() {
+        super.bootstrap();
+        if (this.props.frames) this.setUp(this.props.frames);
+    }
+
     setUp(frames) {
-        this.frameRates = _.isArray(this.props.duration) ? this.props.duration :
+        let frameRates = _.isArray(this.props.duration) ? this.props.duration :
             _.fill(Array(frames), this.props.duration / frames);
+        this.setState({frameRates});
     }
 
     animate(i = 1) {
@@ -40,7 +46,7 @@ class Animation extends Component {
             }
         }
 
-        if (NOW > this.lastAnimation + this.frameRates[this.state.frame]) {
+        if (NOW > this.lastAnimation + this.state.frameRates[this.state.frame]) {
             let frame = (this.state.frame + i + this.props.frames) % this.props.frames;
             this.lastAnimation = NOW;
             if (frame === 0) this.props.onLoop.call(this);
@@ -93,7 +99,6 @@ class Animation extends Component {
 
     getClassNames() {
         return classNames(
-            this.props.spriteClass,
             this.props.frameSelectors[this.state.frame] || `frame-${this.state.frame}`,
             super.getClassNames()
         );
@@ -101,32 +106,15 @@ class Animation extends Component {
 
     render() {
         return (
-            <div {...this.props} >
-                <SpriteCss
-                    ref="css"
-                    onSetUp={this.setUp}
-                    src={this.props.src}
-                    dataSrc={this.props.dataSrc}
-                    extension={this.props.extension}
-                    dataExtension={this.props.dataExtension}
-                    spriteSelector={this.props.spriteSelector}
-                    frameSelectors={this.props.frameSelectors}
-                />
-                <div
-                    ref="sprite"
-                    className={this.getClassNames()}
-                />
-            </div>
+            <div
+                {...this.props}
+                className={this.getClassNames()}
+            />
         );
     }
 }
 
 Animation.defaultProps = _.defaults({
-    src: '',
-    dataSrc: '',
-    extension: 'png',
-    dataExtension: 'json',
-    spriteClass: 'css-sprite',
     frameSelectors: {},
     duration: 1000,
     frame: 0,
