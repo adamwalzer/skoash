@@ -2,7 +2,7 @@ import Component from 'components/component';
 import JSON from 'components/json';
 import Image from 'components/image';
 
-class Sprite extends Component {
+class SpriteCss extends Component {
     constructor(props) {
         super(props);
 
@@ -27,31 +27,25 @@ class Sprite extends Component {
             let maxHeight = _.reduce(this.data.frames, (a, v) =>
                 Math.max(a, v.spriteSourceSize.y + v.spriteSourceSize.h - minY), 0);
 
-            let styleText = `${this.props.spriteSelector}` +
-                `{ display: inline-block; width: ${maxWidth}px; height: ${maxHeight}px }`;
+            let styleText = `.${this.props.spriteClass}` +
+                `{ display: inline-block; position: relative; width: ${maxWidth}px; height: ${maxHeight}px }`;
 
-            styleText = _.reduce(this.data.frames, (text, frameData, k) => {
-                let selector = this.props.frameSelectors[k] || `.frame-${k}::before`;
-                let rules = {
-                    position: 'absolute',
-                    top: `${frameData.spriteSourceSize.y - minY}px`,
-                    left: `${frameData.spriteSourceSize.x - minX}px`,
-                    backgroundImage: `url(${this.props.src}.${this.props.extension})`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: `-${frameData.frame.x}px -${frameData.frame.y}px`,
-                    backgroundSize: `${this.data.meta.size.w}px ${this.data.meta.size.h}px`,
-                    width: `${frameData.frame.w}px`,
-                    height: `${frameData.frame.h}px`,
-                    content: '\'\'',
-                };
-                text += `${this.props.spriteSelector}${selector} {`;
-                text = _.reduce(rules, (a, v, i) => {
-                    a += `${_.kebabCase(i)}: ${v};`;
-                    return a;
-                }, text);
-                text += '}';
-                return text;
-            }, styleText);
+            styleText = _.reduce(this.data.frames, (text, frameData, k) =>
+                text +
+                `.${this.props.spriteClass}` +
+                `${(this.props.frameSelectors[k] || `.frame-${k}`) + '::before'} {` +
+                'position: absolute;' +
+                `top: ${frameData.spriteSourceSize.y - minY}px;` +
+                `left: ${frameData.spriteSourceSize.x - minX}px;` +
+                `background-image: url(${this.props.src}.${this.props.extension});` +
+                'background-repeat: no-repeat;' +
+                `background-position: -${frameData.frame.x}px -${frameData.frame.y}px;` +
+                `background-size: ${this.data.meta.size.w}px ${this.data.meta.size.h}px;` +
+                `width: ${frameData.frame.w}px;` +
+                `height: ${frameData.frame.h}px;` +
+                'content: \'\';' +
+                '}'
+            , styleText);
 
             this.setState({
                 styleText
@@ -102,14 +96,14 @@ class Sprite extends Component {
     }
 }
 
-Sprite.defaultProps = _.defaults({
+SpriteCss.defaultProps = _.defaults({
     src: '',
     dataSrc: '',
     extension: 'png',
     dataExtension: 'json',
-    spriteSelector: '.css-sprite',
+    spriteClass: 'css-sprite',
     frameSelectors: {},
     onSetUp: _.noop,
 }, Component.defaultProps);
 
-export default Sprite;
+export default SpriteCss;

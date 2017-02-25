@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import Component from 'components/component';
 import SpriteCss from 'components/sprite_css';
 
-class SpriteAnimation extends Component {
+class Animation extends Component {
     constructor(props) {
         super(props);
 
@@ -16,10 +16,9 @@ class SpriteAnimation extends Component {
         this.setUp = this.setUp.bind(this);
     }
 
-    setUp() {
-        this.props.frames = _.get(this, 'refs.css.data.frames.length', 1);
+    setUp(frames) {
         this.frameRates = _.isArray(this.props.duration) ? this.props.duration :
-            _.fill(Array(this.props.frames), this.props.duration / this.props.frames);
+            _.fill(Array(frames), this.props.duration / frames);
     }
 
     animate(i = 1) {
@@ -81,6 +80,10 @@ class SpriteAnimation extends Component {
             this.setState({ frame: props.frame });
         }
 
+        if (props.frames !== this.props.frames) {
+            this.setUp(props.frames);
+        }
+
         if (props.animate && props.animate !== this.props.animate) {
             this.animate();
         } else if (props.animateBackwards && props.animateBackwards !== this.props.animateBackwards) {
@@ -118,7 +121,7 @@ class SpriteAnimation extends Component {
     }
 }
 
-SpriteAnimation.defaultProps = _.defaults({
+Animation.defaultProps = _.defaults({
     src: '',
     dataSrc: '',
     extension: 'png',
@@ -137,4 +140,4 @@ SpriteAnimation.defaultProps = _.defaults({
     onUpdate: _.noop,
 }, Component.defaultProps);
 
-export default SpriteAnimation;
+export default Animation;

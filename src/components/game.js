@@ -259,6 +259,10 @@ class Game extends Component {
             var props = this.props.screens[key].props || {};
             props.data = this.state.data.screens[key];
             props.load = this.state.screenLoads[key];
+            props.prevButtonClassName = _.isString(this.props.prevButtonClassName) ?
+                this.props.prevButtonClassName : this.props.prevButtonClassName[key];
+            props.nextButtonClassName = _.isString(this.props.nextButtonClassName) ?
+                this.props.nextButtonClassName : this.props.nextButtonClassName[key];
             props.gameState = this.state;
             props.index = index;
             if (
@@ -331,6 +335,8 @@ Game.defaultProps = _.defaults({
         opts.name = 'getData';
         return this.eventManager.emit(opts);
     },
+    prevButtonClassName: '',
+    nextButtonClassName: '',
     screenComplete: function (opts) {
         let screen = this.getCurrentScreen();
 
