@@ -246,7 +246,7 @@ Screen.defaultProps = _.defaults({
     },
     renderNextButton: function () {
         return (
-            <button className="next-screen" onClick={this.prev}>
+            <button className="next-screen" onClick={this.next}>
                 {this.props.nextContent}
             </button>
         );
