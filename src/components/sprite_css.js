@@ -1,5 +1,6 @@
 import Component from 'components/component';
 import JSON from 'components/json';
+import Image from 'components/image';
 
 class Sprite extends Component {
     constructor(props) {
@@ -70,6 +71,15 @@ class Sprite extends Component {
         );
     }
 
+    renderImage() {
+        return (
+            <Image
+                ref="image"
+                src={`${this.props.dataSrc || this.props.src}.${this.props.extension}`}
+            />
+        );
+    }
+
     renderCSS() {
         return (
             <style>
@@ -85,6 +95,7 @@ class Sprite extends Component {
                 style={{display: 'none'}}
             >
                 {this.renderJSON()}
+                {this.renderImage()}
                 {this.renderCSS()}
             </div>
         );
