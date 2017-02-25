@@ -1,117 +1,91 @@
 import classNames from 'classnames';
+import shortid from 'shortid';
 
 import Component from 'components/component';
-import SpriteCss from 'components/sprite_css';
 
 class SpriteAnimation extends Component {
     constructor(props) {
         super(props);
 
-        this.state = _.defaults({
-            frame: props.frame,
-        }, this.state);
+        this.uniqueID = shortid(Math.random());
+        this.sprite = {};
 
-        this.lastAnimation = Date.now();
-
-        this.setUp = this.setUp.bind(this);
+        /* eslint-disable no-console */
+        console.warn('Consider switching to skoash.Sprite as SpriteAnimation will soon be deprecated.');
+        /* eslint-enable no-console */
     }
 
-    setUp() {
-        this.props.frames = _.get(this, 'refs.css.data.frames.length', 1);
-        this.frameRates = _.isArray(this.props.duration) ? this.props.duration :
-            _.fill(Array(this.props.frames), this.props.duration / this.props.frames);
-    }
-
-    animate(i = 1) {
-        const NOW = Date.now();
-
-        if (this.props.pause || this.state.paused || !this.state.started) return;
-
-        if (!this.props.loop) {
-            if (this.props.animateBackwards) {
-                if (this.state.frame === 0) {
-                    this.complete();
-                    return;
-                }
-            }
-
-            if (this.state.frame === this.props.frames - 1) {
-                this.complete();
-                return;
-            }
-        }
-
-        if (NOW > this.lastAnimation + this.frameRates[this.state.frame]) {
-            let frame = (this.state.frame + i + this.props.frames) % this.props.frames;
-            this.lastAnimation = NOW;
-            if (frame === 0) this.props.onLoop.call(this);
-            this.setState({
-                frame
-            });
-        }
-
-        window.requestAnimationFrame(() => {
-            this.animate(i);
-        });
+    onReady() {
+        this.sprite = ReactDOM.findDOMNode(this.refs.sprite);
     }
 
     start() {
-        super.start(() => {
-            if (this.props.animate) this.animate();
-        });
+        super.start();
+        if (this.props.animateOnStart) this.animate();
     }
 
-    pause() {
-        super.pause();
-        this.setState({ paused: true });
-    }
-
-    resume() {
-        super.resume();
-        this.setState({ paused: false }, () => {
-            if (this.props.animate) this.animate();
-            else if (this.props.animateBackwards) this.animate(-1);
+    animate(animate = true) {
+        this.setState({
+            animate
         });
     }
 
     componentWillReceiveProps(props) {
         super.componentWillReceiveProps(props);
 
-        if (props.frame !== this.props.frame) {
-            this.setState({ frame: props.frame });
-        }
-
-        if (props.animate && props.animate !== this.props.animate) {
-            this.animate();
-        } else if (props.animateBackwards && props.animateBackwards !== this.props.animateBackwards) {
-            this.animate(-1);
+        if (props.animate !== this.props.animate) {
+            this.animate(props.animate);
         }
     }
 
+    getStyle() {
+        var animation = `${this.uniqueID}${this.state.animate ? '' : '-back'} ` +
+      `${this.props.duration}s steps(${this.props.frames - 1}) forwards`;
+
+        return {
+            backgroundImage: `url(${this.props.src})`,
+            backgroundSize: `${this.sprite.offsetWidth * this.props.frames}px`,
+            WebkitAnimation: animation,
+            animation,
+        };
+    }
+
     getClassNames() {
-        return classNames(
-            this.props.spriteClass,
-            this.props.frameSelectors[this.state.frame] || `frame-${this.state.frame}`,
-            super.getClassNames()
-        );
+        return classNames('sprite-animation', {
+            ANIMATE: this.state.animate,
+        }, this.uniqueID, super.getClassNames());
     }
 
     render() {
         return (
-            <div {...this.props} >
-                <SpriteCss
-                    ref="css"
-                    onSetUp={this.setUp}
-                    src={this.props.src}
-                    dataSrc={this.props.dataSrc}
-                    extension={this.props.extension}
-                    dataExtension={this.props.dataExtension}
-                    spriteSelector={this.props.spriteSelector}
-                    frameSelectors={this.props.frameSelectors}
-                />
+            <div>
+                <style>
+                    {
+                        `@keyframes ${this.uniqueID} {\n` +
+                        '    0% {\n' +
+                        '        background-position: 0px center;\n' +
+                        '    }\n' +
+                        '    100% {\n' +
+                        '        background-position: -' +
+                            `${this.sprite.offsetWidth * (this.props.frames - 1)}px center;\n` +
+                        '    }\n' +
+                        '}\n' +
+                        `@keyframes ${this.uniqueID}-back {\n` +
+                        '    0% {\n' +
+                        '        background-position: -' +
+                            `${this.sprite.offsetWidth * (this.props.frames - 1)}px center;\n` +
+                        '    }\n' +
+                        '    100% {\n' +
+                        '        background-position: 0px center;\n' +
+                        '    }\n' +
+                        '}\n'
+                    }
+                </style>
                 <div
+                    {...this.props}
                     ref="sprite"
                     className={this.getClassNames()}
+                    style={this.getStyle()}
                 />
             </div>
         );
@@ -119,22 +93,10 @@ class SpriteAnimation extends Component {
 }
 
 SpriteAnimation.defaultProps = _.defaults({
+    animateOnStart: true,
     src: '',
-    dataSrc: '',
-    extension: 'png',
-    dataExtension: 'json',
-    spriteClass: 'css-sprite',
-    frameSelectors: {},
-    duration: 1000,
-    frame: 0,
     frames: 1,
-    hoverFrame: null,
-    pause: false,
-    loop: true,
-    animate: false,
-    animateBackwards: false,
-    onLoop: _.noop,
-    onUpdate: _.noop,
+    duration: 1,
 }, Component.defaultProps);
 
 export default SpriteAnimation;
