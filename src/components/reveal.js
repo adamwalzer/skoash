@@ -197,6 +197,11 @@ class Reveal extends Component {
         return classes;
     }
 
+    renderCloseButton() {
+        if (this.props.hideCloseButton) return null;
+        return this.props.renderCloseButton.call(this);
+    }
+
     render() {
         return (
             <div className={this.getClassNames()}>
@@ -205,13 +210,13 @@ class Reveal extends Component {
                     <ul>
                         {this.renderList()}
                     </ul>
-                    <button className="close-reveal" onClick={this.close.bind(this)}></button>
+                    {this.renderCloseButton()}
                 </div>
             </div>
         );
     }
 }
-
+    
 Reveal.defaultProps = _.defaults({
     list: [
         <li></li>,
@@ -222,6 +227,17 @@ Reveal.defaultProps = _.defaults({
     openMultiple: false,
     onOpen: _.noop,
     onClose: _.noop,
+    closeButtonContent: null,
+    renderCloseButton: function () {
+        return (
+            <button
+                className={classNames('close-reveal', this.props.prevButtonClassName)}
+                onClick={this.close.bind(this)}
+            >
+                {this.props.closeButtonContent}
+            </button>
+        );
+    },
 }, Component.defaultProps);
 
 export default Reveal;
