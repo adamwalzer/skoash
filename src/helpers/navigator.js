@@ -4,6 +4,7 @@ class Navigator {
         this.shouldGoto = this.shouldGoto.bind(game);
         this.openNewScreen = this.openNewScreen.bind(game);
         this.closeOldScreen = this.closeOldScreen.bind(game);
+        this.loadScreens = this.loadScreens.bind(game);
         this.getDefaultButtonSound = this.getDefaultButtonSound.bind(game);
         this.goBack = this.goBack.bind(game);
         this.openMenu = this.openMenu.bind(game);
@@ -89,11 +90,14 @@ class Navigator {
         if (!newScreen) return screenIndexArray;
 
         // this should only be dropped into for non-linear screens
-        if (!newScreen.state.load || !newScreen.state.ready) {
-            this.loadScreens(currentScreenIndex);
-        } else {
-            newScreen.open(opts);
+        if (
+            (!newScreen.state.load || !newScreen.state.ready) &&
+            !this.state.screenLoads[currentScreenIndex]
+        ) {
+            this.navigator.loadScreens(currentScreenIndex);
         }
+
+        newScreen.open(opts);
 
         screenIndexArray.push(currentScreenIndex);
 
@@ -103,7 +107,7 @@ class Navigator {
     closeOldScreen(oldScreen, newScreen, opts, oldIndex) {
         var back = oldScreen.props.index > newScreen.props.index;
         var buttonSound;
-        var data = _.cloneDeep(this.state.data);
+        var data = this.state.data;
 
         if (!oldScreen || oldScreen === newScreen) return data;
 
@@ -120,6 +124,38 @@ class Navigator {
         _.invoke(buttonSound, 'play');
 
         return data;
+    }
+
+    loadScreens(currentScreenIndex, goto = true) {
+        var firstScreen;
+        var secondScreen;
+
+        if (!_.isFinite(currentScreenIndex)) currentScreenIndex = this.state.currentScreenIndex;
+
+        this.setState({
+            screenLoads: {
+                [currentScreenIndex]: true,
+                [currentScreenIndex + 1]: true,
+            },
+        }, () => {
+            firstScreen = this.refs['screen-' + currentScreenIndex];
+            secondScreen = this.refs['screen-' + currentScreenIndex + 1];
+
+            if (firstScreen) {
+                firstScreen.load(() => {
+                    this.checkReady();
+
+                    if (goto) {
+                        this.navigator.goto({
+                            index: currentScreenIndex,
+                            load: true,
+                            silent: true,
+                        });
+                    }
+                });
+            }
+            if (secondScreen) secondScreen.load();
+        });
     }
 
     getDefaultButtonSound(back) {

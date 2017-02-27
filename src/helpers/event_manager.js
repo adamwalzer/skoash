@@ -10,20 +10,15 @@ class EventManager {
     }
 
     attachEvents() {
-        var onblur;
-        var onfocusout;
-
         window.addEventListener('resize', () => {
             this.scale();
         });
         window.addEventListener('orientationchange', () => {
             window.dispatchEvent(new Event('resize'));
         });
-        if (window.parent) {
-            window.parent.addEventListener('orientationchange', () => {
-                window.dispatchEvent(new Event('orientationchange'));
-            });
-        }
+        _.invoke(window, 'parent.addEventListener', 'orientationchange', () => {
+            window.dispatchEvent(new Event('orientationchange'));
+        });
 
         window.addEventListener('keydown', e => {
             this.eventManager.onKeyDown(e);
@@ -42,42 +37,9 @@ class EventManager {
             this.resume();
         });
 
-        onblur = () => {
-            var node = document.activeElement.parentNode;
-            while (node != null) {
-                if (node === this.DOMNode) {
-                    return;
-                }
-                node = node.parentNode;
-            }
+        window.addEventListener('blur', () => {
             this.pause();
-        };
-
-        onfocusout = () => {
-            this.pause();
-        };
-
-        window.addEventListener('blur', onblur);
-
-        /* eslint-disable max-len */
-        // code from http://stackoverflow.com/questions/1060008/is-there-a-way-to-detect-if-a-browser-window-is-not-currently-active
-        /* eslint-enable */
-        // Standards:
-        if ('hidden' in document) {
-            document.addEventListener('visibilitychange', onfocusout);
-        } else if ('mozHidden' in document) {
-            document.addEventListener('mozvisibilitychange', onfocusout);
-        } else if ('webkitHidden' in document) {
-            document.addEventListener('webkitvisibilitychange', onfocusout);
-        } else if ('msHidden' in document) {
-            document.addEventListener('msvisibilitychange', onfocusout);
-        } else if ('onfocusin' in document) {
-            // IE 9 and lower:
-            document.onfocusin = document.onfocusout = onfocusout;
-        } else {
-            // All others:
-            window.onpageshow = window.onpagehide = window.onfocus = window.onblur = onfocusout;
-        }
+        });
     }
 
     onKeyDown(e) {
@@ -133,6 +95,7 @@ class EventManager {
         _.invoke(this.props.getTriggerEvents.call(this, {
             goto: this.navigator.goto,
             goBack: this.navigator.goBack,
+            playMedia: this.playMedia,
             audioPlay: this.mediaManager.audioPlay,
             audioStop: this.mediaManager.audioStop,
             videoPlay: this.mediaManager.videoPlay,

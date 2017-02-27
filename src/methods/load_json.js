@@ -1,7 +1,7 @@
-import loadFile from './load_file.js';
+import loadFile from './load_file';
 
 export default function (file, callback) {
-    return loadFile(file, data => {
-        callback(JSON.parse(data));
-    });
+    loadFile(file, data => {
+        callback(_.isString(data) ? JSON.parse(data) : data);
+    }, 'json');
 }
