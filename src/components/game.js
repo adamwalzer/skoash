@@ -25,6 +25,7 @@ class Game extends Component {
             demo: false,
             data: {},
             classes: [],
+            screenLoads: {},
         };
 
         this.state.data.screens = _.map(props.screens, () => ({}));
@@ -63,36 +64,11 @@ class Game extends Component {
         }
 
         this.collectMedia();
-        this.loadScreens(this.state.currentScreenIndex, false);
+        this.navigator.loadScreens(this.state.currentScreenIndex, false);
 
         this.DOMNode = ReactDOM.findDOMNode(this);
 
         this.props.onBootstrap.call(this);
-    }
-
-    loadScreens(currentScreenIndex, goto = true) {
-        var firstScreen;
-        var secondScreen;
-
-        if (!_.isFinite(currentScreenIndex)) currentScreenIndex = this.state.currentScreenIndex;
-
-        firstScreen = this.refs['screen-' + currentScreenIndex];
-        secondScreen = this.refs['screen-' + currentScreenIndex + 1];
-
-        if (firstScreen) {
-            firstScreen.load(() => {
-                this.checkReady();
-
-                if (goto) {
-                    this.navigator.goto({
-                        index: currentScreenIndex,
-                        load: true,
-                        silent: true,
-                    });
-                }
-            });
-        }
-        if (secondScreen) secondScreen.load();
     }
 
     ready() {
@@ -175,7 +151,7 @@ class Game extends Component {
             opts.version === this.props.config.version &&
             opts.highestScreenIndex) {
             if (opts.highestScreenIndex === this.screensLength - 1) return;
-            this.loadScreens(opts.highestScreenIndex);
+            this.navigator.loadScreens(opts.highestScreenIndex);
         }
     }
 
@@ -282,9 +258,14 @@ class Game extends Component {
         return _.map(Object.keys(this.props.screens), (key, index) => {
             var props = this.props.screens[key].props || {};
             props.data = this.state.data.screens[key];
+            props.load = this.state.screenLoads[key];
             props.gameState = this.state;
             props.index = index;
-            if (_.isNumber(_.parseInt(key)) && Math.abs(this.state.currentScreenIndex - index) > 5) {
+            if (
+                !props.load &&
+                _.isNumber(_.parseInt(key)) &&
+                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBeforeAndAfter
+            ) {
                 return null;
             }
             return this.props.screens[key](props, 'screen-' + key, key);
@@ -306,11 +287,11 @@ class Game extends Component {
     render() {
         return (
             <div className={this.getClassNames()} style={this.getStyles()}>
-                {this.renderContentList('loader')}
                 {this.renderContentList('assets')}
                 {this.props.renderMenu.call(this)}
                 {this.renderScreens()}
                 {this.renderMenuScreens()}
+                {this.renderContentList('loader')}
             </div>
         );
     }
@@ -320,6 +301,7 @@ Game.defaultProps = _.defaults({
     componentName: 'skoash-game',
     getBackgroundIndex: () => 0,
     passData: _.noop,
+    screenBeforeAndAfter: 5,
     screens: {
         0: function (props, ref, key) {
             return (

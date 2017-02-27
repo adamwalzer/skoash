@@ -11,7 +11,7 @@ class Screen extends Component {
             leave: false,
             close: true,
             complete: false,
-            load: false,
+            load: props.load,
         };
 
         this.next = this.next.bind(this);
@@ -65,6 +65,9 @@ class Screen extends Component {
                 super.bootstrap();
                 this.props.onLoad.call(this);
             });
+        } else {
+            _.invoke(this, 'onReadyCallback.call', this);
+            this.onReadyCallback = null;
         }
     }
 
@@ -184,6 +187,12 @@ class Screen extends Component {
         return this.props.loadData.call(this);
     }
 
+    componentWillReceiveProps(props) {
+        super.componentWillReceiveProps(props);
+
+        if (props.load && props.load !== this.props.load) this.load();
+    }
+
     renderContent() {
         if (!this.state.load) return null;
         return (
@@ -195,16 +204,12 @@ class Screen extends Component {
 
     renderPrevButton() {
         if (this.props.hidePrev) return null;
-        return (
-            <button className="prev-screen" onClick={this.prev} />
-        );
+        return this.props.renderPrevButton.call(this);
     }
 
     renderNextButton() {
         if (this.props.hideNext) return null;
-        return (
-            <button className="next-screen" onClick={this.next} />
-        );
+        return this.props.renderNextButton.call(this);
     }
 
     render() {
@@ -220,6 +225,7 @@ class Screen extends Component {
 
 Screen.defaultProps = _.defaults({
     componentName: 'screen',
+    load: false,
     resetOnClose: true,
     startDelay: 250,
     collectData: _.noop,
@@ -229,6 +235,24 @@ Screen.defaultProps = _.defaults({
     onUnload: _.noop,
     shouldUnload: true,
     gameState: {},
+    hidePrev: false,
+    hideNext: false,
+    renderPrevButton: function () {
+        return (
+            <button className="prev-screen" onClick={this.prev}>
+                {this.props.prevContent}
+            </button>
+        );
+    },
+    renderNextButton: function () {
+        return (
+            <button className="next-screen" onClick={this.next}>
+                {this.props.nextContent}
+            </button>
+        );
+    },
+    prevContent: null,
+    nextContent: null,
 }, Component.defaultProps);
 
 export default Screen;
