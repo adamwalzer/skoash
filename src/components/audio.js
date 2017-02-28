@@ -1,7 +1,7 @@
 // AJW 20161115
 // Howler 2.0.1 is out. Perhaps we should give it a try.
 import { Howl } from 'howler';
-import Media from './media.js';
+import Media from './media';
 
 class Audio extends Media {
     constructor(props) {
