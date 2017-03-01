@@ -95,7 +95,7 @@ class EventManager {
         _.invoke(this.props.getTriggerEvents.call(this, {
             goto: this.navigator.goto,
             goBack: this.navigator.goBack,
-            playMedia: this.playMedia,
+            playMedia: obj => this.playMedia(obj.ref),
             audioPlay: this.mediaManager.audioPlay,
             audioStop: this.mediaManager.audioStop,
             videoPlay: this.mediaManager.videoPlay,
