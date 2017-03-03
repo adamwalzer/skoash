@@ -4,13 +4,15 @@ import Component from 'components/component';
 
 const AREA = 'area';
 const CONTENT = 'content';
+const HORIZONTAL = 'horizontal';
+const VERTICAL = 'vertical';
 
 class Slider extends Component {
     constructor(props) {
         super(props);
 
         this.state = _.defaults({
-            currentSlide: 0,
+            firstSlide: 0,
         }, this.state);
 
         this.prev = this.prev.bind(this);
@@ -19,32 +21,38 @@ class Slider extends Component {
     }
 
     prev() {
-        this.changeSlide(-1);
+        this.changeSlide(-1 * this.props.increment);
     }
 
     next() {
-        this.changeSlide(1);
+        this.changeSlide(this.props.increment);
     }
 
-    changeSlide(increment = 1) {
-        var currentSlide;
+    changeSlide(increment) {
+        var firstSlide;
 
         if (this.props.loop) {
-            currentSlide = (this.state.currentSlide + increment + this.props.children.length) %
+            firstSlide = (this.state.firstSlide + increment + this.props.children.length) %
                 this.props.children.length;
         } else {
-            currentSlide = Math.max(this.state.currentSlide + increment, 0);
+            firstSlide = Math.max(this.state.firstSlide + increment, 0);
         }
 
         this.setState({
-            currentSlide
+            firstSlide
         });
     }
 
     getContentStyle() {
-        return {
-            marginLeft: this.state.currentSlide * -100 + '%'
-        };
+        if (this.props.orientation === HORIZONTAL) {
+            return {
+                marginLeft: this.state.firstSlide * -100 + '%'
+            };
+        } else {
+            return {
+                marginTop: this.state.firstSlide * -100 + '%'
+            };
+        }
     }
 
     getClassNames() {
@@ -58,7 +66,8 @@ class Slider extends Component {
             var opacity;
             if (!component) return;
             ref = component.ref || (component.props && component.props['data-ref']) || listName + '-' + key;
-            opacity = key === this.state.currentSlide ? 1 : 0;
+            opacity = (key >= this.state.firstSlide &&
+                key < this.state.firstSlide + this.props.display) ? 1 : 0;
             return (
                 <component.type
                     gameState={this.props.gameState}
@@ -96,6 +105,9 @@ class Slider extends Component {
 
 Slider.defaultProps = _.defaults({
     loop: true,
+    display: 1,
+    orientation: HORIZONTAL,
+    increment: 1,
 }, Component.defaultProps);
 
 export default Slider;
