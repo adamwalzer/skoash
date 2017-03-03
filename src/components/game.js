@@ -28,6 +28,10 @@ class Game extends Component {
             screenLoads: {},
         };
 
+        /* eslint-disable no-console */
+        console.warn(props.config);
+        /* eslint-enable no-console */
+
         this.state.data.screens = _.map(props.screens, () => ({}));
 
         this.screensLength = Object.keys(props.screens).length;
