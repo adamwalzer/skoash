@@ -19,9 +19,12 @@ class Labyrinth extends Component {
 
     onReady() {
         this[IMAGE] = ReactDOM.findDOMNode(this.refs[IMAGE]);
-        this[MAP] = ReactDOM.findDOMNode(this.refs[MAP]);
         this[PLAYER] = ReactDOM.findDOMNode(this.refs[PLAYER]);
         this[BUFFER] = ReactDOM.findDOMNode(this.refs[CANVAS]);
+
+        this[MAP] = new Image;
+        this[MAP].crossOrigin = 'Anonymous';
+        this[MAP].src = this.refs[MAP].props.src;
 
         this[CONTEXT] = this[BUFFER].getContext('2d');
 
