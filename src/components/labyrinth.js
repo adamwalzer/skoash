@@ -24,6 +24,8 @@ class Labyrinth extends Component {
 
         this[MAP] = new Image;
         this[MAP].crossOrigin = 'Anonymous';
+        this[MAP].width = this[IMAGE].width;
+        this[MAP].height = this[IMAGE].height;
         this[MAP].src = this.refs[MAP].props.src;
 
         this[CONTEXT] = this[BUFFER].getContext('2d');
@@ -66,6 +68,7 @@ class Labyrinth extends Component {
         var playerY = this.state.playerY;
 
         if (!this[PLAYER]) return;
+        if (!this.state.started) return;
 
         if (this.props.input.up) playerY -= this.props.speed;
         if (this.props.input.down) playerY += this.props.speed;
