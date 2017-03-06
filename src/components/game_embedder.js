@@ -39,10 +39,6 @@ class GameEmbedder extends Component {
     }
 
     onLoad() {
-        this.emitEvent({
-            name: 'focus',
-        });
-
         this.setState({
             loaded: true,
         }, () => {

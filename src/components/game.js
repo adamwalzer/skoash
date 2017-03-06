@@ -299,6 +299,7 @@ class Game extends Component {
                 {this.props.renderMenu.call(this)}
                 {this.renderScreens()}
                 {this.renderMenuScreens()}
+                {this.props.renderExtras.call(this)}
                 {this.renderContentList('loader')}
             </div>
         );
@@ -332,6 +333,7 @@ Game.defaultProps = _.defaults({
             </div>
         );
     },
+    renderExtras: _.noop,
     getGotoOpts: _.identity, // don't change to _.noop
     getTriggerEvents: _.identity, // don't change to _.noop
     triggerReady: false,
