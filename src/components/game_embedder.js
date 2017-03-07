@@ -39,6 +39,10 @@ class GameEmbedder extends Component {
     }
 
     onLoad() {
+        this.emitEvent({
+            name: 'focus',
+        });
+
         this.setState({
             loaded: true,
         }, () => {
@@ -48,6 +52,7 @@ class GameEmbedder extends Component {
 
     pause() {
         super.pause();
+        if (!this.state.phaserReady) return;
         this.emitEvent({ name: 'pause' });
     }
 
@@ -81,6 +86,13 @@ class GameEmbedder extends Component {
             this.emitEvent({
                 name: 'data-update',
                 data: props.data,
+            });
+        }
+
+        if (props.state && props.state !== this.props.state) {
+            this.emitEvent({
+                name: 'state-update',
+                data: props.state,
             });
         }
 

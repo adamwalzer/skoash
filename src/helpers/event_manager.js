@@ -32,7 +32,6 @@ class EventManager {
             this.eventManager.trigger(e.name, e.opts);
         });
 
-        window.addEventListener('load', window.focus);
         window.addEventListener('focus', () => {
             this.resume();
         });
