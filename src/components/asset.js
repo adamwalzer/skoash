@@ -1,4 +1,4 @@
-import Component from './component.js';
+import Component from './component';
 
 /*
  * the Asset class is meant for all assets

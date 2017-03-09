@@ -1,4 +1,4 @@
-import Asset from './asset.js';
+import Asset from './asset';
 
 /*
  * the Media class is meant for all playable assets
