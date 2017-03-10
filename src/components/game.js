@@ -310,7 +310,7 @@ Game.defaultProps = _.defaults({
     componentName: 'skoash-game',
     getBackgroundIndex: () => 0,
     passData: _.noop,
-    screenBeforeAndAfter: 3,
+    screenBufferAmount: 3,
     screens: {
         0: function (props, ref, key) {
             return (
