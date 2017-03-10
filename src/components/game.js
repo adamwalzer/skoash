@@ -24,6 +24,7 @@ class Game extends Component {
             loading: true,
             demo: false,
             data: {},
+            content: props.content,
             classes: [],
             screenLoads: {},
         };
@@ -225,6 +226,10 @@ class Game extends Component {
         if (props.screens && props.screens !== this.props.screens) {
             this.screensLength = Object.keys(props.screens).length;
         }
+
+        if (props.content && props.content !== this.props.content) {
+            this.setState({content: props.content});
+        }
     }
 
     getClassNames() {
@@ -260,8 +265,11 @@ class Game extends Component {
 
     renderScreens() {
         return _.map(Object.keys(this.props.screens), (key, index) => {
-            var props = _.defaults({
-                data: this.state.data.screens[key],
+            // data will eventually be removed from screen props
+            // in favor of passing it in as a param to the screen function
+            let data = this.state.data.screens[key];
+            let props = _.defaults({
+                data,
                 load: this.state.screenLoads[key],
                 prevButtonClassName: _.isString(this.props.prevButtonClassName) ?
                     this.props.prevButtonClassName : this.props.prevButtonClassName[key],
@@ -270,6 +278,7 @@ class Game extends Component {
                 gameState: this.state,
                 index,
             }, this.props.screens[key].props);
+
             if (
                 !props.load &&
                 _.isNumber(_.parseInt(key)) &&
@@ -277,7 +286,13 @@ class Game extends Component {
             ) {
                 return null;
             }
-            return this.props.screens[key](props, 'screen-' + key, key);
+
+            return this.props.screens[key](
+                props, 'screen-' + key,
+                key,
+                this.state.content.screens[key],
+                data
+            );
         });
     }
 
