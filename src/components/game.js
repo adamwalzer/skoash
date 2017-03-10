@@ -260,19 +260,20 @@ class Game extends Component {
 
     renderScreens() {
         return _.map(Object.keys(this.props.screens), (key, index) => {
-            var props = this.props.screens[key].props || {};
-            props.data = this.state.data.screens[key];
-            props.load = this.state.screenLoads[key];
-            props.prevButtonClassName = _.isString(this.props.prevButtonClassName) ?
-                this.props.prevButtonClassName : this.props.prevButtonClassName[key];
-            props.nextButtonClassName = _.isString(this.props.nextButtonClassName) ?
-                this.props.nextButtonClassName : this.props.nextButtonClassName[key];
-            props.gameState = this.state;
-            props.index = index;
+            var props = _.defaults({
+                data: this.state.data.screens[key],
+                load: this.state.screenLoads[key],
+                prevButtonClassName: _.isString(this.props.prevButtonClassName) ?
+                    this.props.prevButtonClassName : this.props.prevButtonClassName[key],
+                nextButtonClassName: _.isString(this.props.nextButtonClassName) ?
+                    this.props.nextButtonClassName : this.props.nextButtonClassName[key],
+                gameState: this.state,
+                index,
+            }, this.props.screens[key].props);
             if (
                 !props.load &&
                 _.isNumber(_.parseInt(key)) &&
-                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBeforeAndAfter
+                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBufferAmount
             ) {
                 return null;
             }
