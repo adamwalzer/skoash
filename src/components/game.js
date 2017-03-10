@@ -272,7 +272,7 @@ class Game extends Component {
             if (
                 !props.load &&
                 _.isNumber(_.parseInt(key)) &&
-                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBeforeAndAfter
+                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBufferAmount
             ) {
                 return null;
             }
