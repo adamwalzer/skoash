@@ -7,8 +7,6 @@ class Audio extends Media {
     constructor(props) {
         super(props);
 
-        this.startCount = 0;
-        this.completeCount = 0;
         this.allowMultiPlay = props.allowMultiPlay || props.type === 'sfx';
 
         this.playAudio = this.playAudio.bind(this);
@@ -40,7 +38,6 @@ class Audio extends Media {
         this.playing = true;
 
         this.audio.play(this.sprite);
-        this.startCount++;
         super.play();
     }
 
@@ -60,9 +57,9 @@ class Audio extends Media {
 
             if (this.delayed) {
                 this.timeout = setTimeout(
-          this.playAudio,
-          this.props.delay
-        );
+                    this.playAudio,
+                    this.props.delay
+                );
             }
 
             if (!this.paused) return;
@@ -114,12 +111,10 @@ class Audio extends Media {
             });
         }
 
-        this.completeCount++;
-
         if (!props.complete && (!this.playing || this.paused)) return;
-        if (this.startCount > this.completeCount) return;
 
         if (!props.loop) this.playing = false;
+
         super.complete();
     }
 
@@ -137,8 +132,7 @@ class Audio extends Media {
         }
 
         this.audio = new Howl({
-            // switch urls to src when moving to Howler ^2.0.0
-            urls: [].concat(this.props.src),
+            src: [].concat(this.props.src),
             format: [].concat(this.props.format),
             loop: this.props.loop,
             volume: this.props.volume,
@@ -149,6 +143,11 @@ class Audio extends Media {
         });
 
         if (this.props.complete) this.complete();
+    }
+
+    componentWillUnmount() {
+        this.audio.unload();
+        delete this.audio;
     }
 
     componentWillReceiveProps(nextProps) {

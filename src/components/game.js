@@ -30,10 +30,10 @@ class Game extends Component {
         };
 
         /* eslint-disable no-console */
-        console.warn(props.config);
+        console.log(props.config);
         /* eslint-enable no-console */
 
-        this.state.data.screens = _.map(props.screens, () => ({}));
+        this.state.data.screens = _.map(props.screens, () => ({}) );
 
         this.screensLength = Object.keys(props.screens).length;
 
@@ -275,6 +275,8 @@ class Game extends Component {
                     this.props.prevButtonClassName : this.props.prevButtonClassName[key],
                 nextButtonClassName: _.isString(this.props.nextButtonClassName) ?
                     this.props.nextButtonClassName : this.props.nextButtonClassName[key],
+                // gameState will eventually be removed from screen props
+                // in favor of passing it in as a param to the screen function
                 gameState: this.state,
                 index,
             }, this.props.screens[key].props);
@@ -288,9 +290,11 @@ class Game extends Component {
             }
 
             return this.props.screens[key](
-                props, 'screen-' + key,
+                props,
+                `screen-${key}`,
                 key,
-                this.state.content.screens[key],
+                _.get(this, `state.content.screens.${key}`),
+                this.state,
                 data
             );
         });
@@ -303,7 +307,7 @@ class Game extends Component {
                 gameState={this.state}
                 key={key}
                 index={key}
-                ref={'menu-' + key}
+                ref={`menu-${key}`}
             />
         );
     }
@@ -327,8 +331,10 @@ Game.defaultProps = _.defaults({
     getBackgroundIndex: () => 0,
     passData: _.noop,
     screenBufferAmount: 3,
-    screens: {
-        0: function (props, ref, key) {
+    screens: [
+        /* eslint-disable no-unused-vars */
+        /* This is disabled to show the available params even though they're not being used */
+        function (props, ref, key, content, gameState, data) {
             return (
                 <Screen
                     {...props}
@@ -336,8 +342,9 @@ Game.defaultProps = _.defaults({
                     key={key}
                 />
             );
-        }
-    },
+        },
+        /* eslint-enable no-unused-vars */
+    ],
     menus: {
         Screen
     },
