@@ -146,7 +146,7 @@ class Audio extends Media {
     }
 
     componentWillUnmount() {
-        this.audio.unload();
+        _.invoke(this, 'audio.unload');
         delete this.audio;
     }
 
