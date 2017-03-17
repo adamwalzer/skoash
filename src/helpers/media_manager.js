@@ -7,6 +7,7 @@ class MediaManager {
         this.fadeBackground = this.fadeBackground.bind(game);
         this.raiseBackground = this.raiseBackground.bind(game);
         this.playBackground = this.playBackground.bind(game);
+        this.loadUnloadMedia = this.loadUnloadMedia.bind(game);
     }
 
     audioPlay(opts) {
@@ -127,6 +128,23 @@ class MediaManager {
         _.each(playingBKG, bkg => _.invoke(bkg, 'stop'));
 
         this.playMedia('audio.background.' + index);
+    }
+
+    loadUnloadMedia(currentScreenIndex) {
+        _.each(this.media.audio, mediaType => {
+            _.each(mediaType, media => {
+                if (!media || !media.props) return;
+
+                if (
+                    currentScreenIndex >= media.props.unloadIndex ||
+                    currentScreenIndex < media.props.loadIndex
+                ) {
+                    _.invoke(media, 'unload');
+                } else {
+                    _.invoke(media, 'load');
+                }
+            });
+        });
     }
 }
 

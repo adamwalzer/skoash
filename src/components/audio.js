@@ -1,5 +1,3 @@
-// AJW 20161115
-// Howler 2.0.1 is out. Perhaps we should give it a try.
 import { Howl } from 'howler';
 import Media from './media';
 
@@ -37,7 +35,7 @@ class Audio extends Media {
         this.delayed = false;
         this.playing = true;
 
-        this.audio.play(this.sprite);
+        _.invoke(this, 'audio.play', this.sprite);
         super.play();
     }
 
@@ -47,7 +45,7 @@ class Audio extends Media {
         }
 
         if (!this.playing) return;
-        this.audio.pause();
+        _.invoke(this, 'audio.pause');
         this.paused = true;
     }
 
@@ -81,25 +79,25 @@ class Audio extends Media {
         });
         this.playing = false;
         this.paused = false;
-        this.audio.stop(this.sprite);
+        _.invoke(this, 'audio.stop', this.sprite);
     }
 
     setVolume(volume) {
         volume = Math.min(this.props.maxVolume,
             Math.max(this.props.minVolume, volume));
-        this.audio.volume(volume);
+        _.invoke(this, 'audio.volume', volume);
     }
 
     increaseVolume(volume) {
         if (!this.playing) return;
         volume = Math.min(volume || this.props.volume, this.props.maxVolume);
-        this.audio.fadeIn(volume);
+        _.invoke(this, 'audio.fadeIn', volume);
     }
 
     decreaseVolume(volume) {
         if (!this.playing) return;
         volume = Math.max(volume, this.props.minVolume);
-        this.audio.fadeOut(volume);
+        _.invoke(this, 'audio.fadeOut', volume);
     }
 
     complete(props) {
@@ -119,17 +117,16 @@ class Audio extends Media {
     }
 
     bootstrap() {
-        var sprite;
+        this.load();
+        if (this.props.complete) this.complete();
+    }
+
+    load() {
+        let sprite = this.props.sprite ? {sprite: this.props.sprite} : undefined;
 
         this.sprite = this.props.sprite ? 'sprite' : undefined;
 
         if (this.audio) return;
-
-        if (this.props.sprite) {
-            sprite = {
-                sprite: this.props.sprite
-            };
-        }
 
         this.audio = new Howl({
             src: [].concat(this.props.src),
@@ -141,13 +138,16 @@ class Audio extends Media {
             rate: this.props.rate,
             sprite,
         });
+    }
 
-        if (this.props.complete) this.complete();
+    unload() {
+        if (!this.audio) return;
+        _.invoke(this, 'audio.unload');
+        delete this.audio;
     }
 
     componentWillUnmount() {
-        _.invoke(this, 'audio.unload');
-        delete this.audio;
+        this.unload();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -172,6 +172,8 @@ Audio.defaultProps = _.defaults({
     shouldRender: false,
     sprite: undefined,
     allowMultiPlay: false,
+    unloadIndex: Infinity,
+    loadIndex: 0,
 }, Media.defaultProps);
 
 export default Audio;

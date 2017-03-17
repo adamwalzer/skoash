@@ -7,6 +7,7 @@ import Image from 'components/image';
 import Font from 'components/font';
 import Media from 'components/media';
 import Audio from 'components/audio';
+import AudioSprite from 'components/audio_sprite';
 import Video from 'components/video';
 import MediaSequence from 'components/media_sequence';
 import ListItem from 'components/list_item';
@@ -51,6 +52,7 @@ window.$k = window.skoash = {
     Font,
     Media,
     Audio,
+    AudioSprite,
     Video,
     MediaSequence,
     ListItem,
