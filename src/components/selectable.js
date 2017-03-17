@@ -41,6 +41,13 @@ class Selectable extends Component {
         }
     }
 
+    incompleteRefs() {
+        super.incompleteRefs();
+        this.setState({
+            classes: {},
+        });
+    }
+
     selectHelper(e, classes) {
         var ref;
         var dataRef;
@@ -73,7 +80,7 @@ class Selectable extends Component {
             classes,
         });
 
-        this.props.onSelect.call(this, dataRef);
+        this.props.onSelect.call(this, dataRef, isCorrect);
 
         if (this.props.chooseOne) this.complete();
 

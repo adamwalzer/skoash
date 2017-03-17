@@ -1,7 +1,7 @@
 // AJW 20161115
 // Howler 2.0.1 is out. Perhaps we should give it a try.
 import { Howl } from 'howler';
-import Media from './media.js';
+import Media from './media';
 
 class Audio extends Media {
     constructor(props) {
@@ -152,6 +152,8 @@ class Audio extends Media {
     }
 
     componentWillReceiveProps(nextProps) {
+        super.componentWillReceiveProps(nextProps);
+
         if (nextProps.volume !== null && nextProps.volume !== this.props.volume) {
             this.setVolume(nextProps.volume);
         }
