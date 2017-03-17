@@ -216,7 +216,7 @@ class Reveal extends Component {
         );
     }
 }
-    
+
 Reveal.defaultProps = _.defaults({
     list: [
         <li></li>,
