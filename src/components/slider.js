@@ -4,13 +4,15 @@ import Component from 'components/component';
 
 const AREA = 'area';
 const CONTENT = 'content';
+const HORIZONTAL = 'horizontal';
+const VERTICAL = 'vertical';
 
 class Slider extends Component {
     constructor(props) {
         super(props);
 
         this.state = _.defaults({
-            currentSlide: 0,
+            firstSlide: 0,
         }, this.state);
 
         this.prev = this.prev.bind(this);
@@ -19,32 +21,49 @@ class Slider extends Component {
     }
 
     prev() {
-        this.changeSlide(-1);
+        this.changeSlide(-1 * this.props.increment);
     }
 
     next() {
-        this.changeSlide(1);
+        this.changeSlide(this.props.increment);
     }
 
-    changeSlide(increment = 1) {
-        var currentSlide;
+    componentDidUpdate() {
+        if (this.props.orientation === HORIZONTAL) {
+            this.adjust = document.getElementsByClassName('slider')[0]
+                .getElementsByClassName(CONTENT)[0].clientWidth / this.props.children.length;
+        } else {
+            this.adjust = document.getElementsByClassName('slider')[0]
+                .getElementsByClassName(CONTENT)[0].clientHeight / this.props.children.length;
+        }
+    }
 
-        if (this.props.loop) {
-            currentSlide = (this.state.currentSlide + increment + this.props.children.length) %
+    changeSlide(increment) {
+        var firstSlide;
+
+        if (this.props.loop && this.props.display === 1) {
+            firstSlide = (this.state.firstSlide + increment + this.props.children.length) %
                 this.props.children.length;
         } else {
-            currentSlide = Math.max(this.state.currentSlide + increment, 0);
+            firstSlide = Math.min(Math.max(this.state.firstSlide + increment, 0),
+                this.props.children.length - this.props.display);
         }
 
         this.setState({
-            currentSlide
+            firstSlide
         });
     }
 
     getContentStyle() {
-        return {
-            marginLeft: this.state.currentSlide * -100 + '%'
-        };
+        if (this.props.orientation === HORIZONTAL) {
+            return {
+                marginLeft: this.state.firstSlide * this.adjust * -1 + 'px'
+            };
+        } else {
+            return {
+                marginTop: this.state.firstSlide * this.adjust * -1 + 'px'
+            };
+        }
     }
 
     getClassNames() {
@@ -56,9 +75,12 @@ class Slider extends Component {
         return children.map((component, key) => {
             var ref;
             var opacity;
+            var position;
             if (!component) return;
             ref = component.ref || (component.props && component.props['data-ref']) || listName + '-' + key;
-            opacity = key === this.state.currentSlide ? 1 : 0;
+            opacity = (key >= this.state.firstSlide &&
+                key < this.state.firstSlide + this.props.display) ? 1 : 0;
+            position = this.props.orientation === HORIZONTAL ? 'left' : 'top';
             return (
                 <component.type
                     gameState={this.props.gameState}
@@ -66,7 +88,7 @@ class Slider extends Component {
                     ref={ref}
                     key={key}
                     style={{
-                        left: (key * 100) + '%',
+                        [position]: (key * 100) + '%',
                         opacity
                     }}
                 />
@@ -96,6 +118,9 @@ class Slider extends Component {
 
 Slider.defaultProps = _.defaults({
     loop: true,
+    display: 1,
+    orientation: HORIZONTAL,
+    increment: 1,
 }, Component.defaultProps);
 
 export default Slider;
