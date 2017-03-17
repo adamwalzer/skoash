@@ -28,6 +28,10 @@ class Game extends Component {
             screenLoads: {},
         };
 
+        /* eslint-disable no-console */
+        console.warn(props.config);
+        /* eslint-enable no-console */
+
         this.state.data.screens = _.map(props.screens, () => ({}));
 
         this.screensLength = Object.keys(props.screens).length;
@@ -268,7 +272,7 @@ class Game extends Component {
             if (
                 !props.load &&
                 _.isNumber(_.parseInt(key)) &&
-                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBeforeAndAfter
+                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBufferAmount
             ) {
                 return null;
             }
@@ -295,6 +299,7 @@ class Game extends Component {
                 {this.props.renderMenu.call(this)}
                 {this.renderScreens()}
                 {this.renderMenuScreens()}
+                {this.props.renderExtras.call(this)}
                 {this.renderContentList('loader')}
             </div>
         );
@@ -305,7 +310,7 @@ Game.defaultProps = _.defaults({
     componentName: 'skoash-game',
     getBackgroundIndex: () => 0,
     passData: _.noop,
-    screenBeforeAndAfter: 5,
+    screenBufferAmount: 3,
     screens: {
         0: function (props, ref, key) {
             return (
@@ -328,6 +333,7 @@ Game.defaultProps = _.defaults({
             </div>
         );
     },
+    renderExtras: _.noop,
     getGotoOpts: _.identity, // don't change to _.noop
     getTriggerEvents: _.identity, // don't change to _.noop
     triggerReady: false,
