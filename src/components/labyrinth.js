@@ -19,9 +19,14 @@ class Labyrinth extends Component {
 
     onReady() {
         this[IMAGE] = ReactDOM.findDOMNode(this.refs[IMAGE]);
-        this[MAP] = ReactDOM.findDOMNode(this.refs[MAP]);
         this[PLAYER] = ReactDOM.findDOMNode(this.refs[PLAYER]);
         this[BUFFER] = ReactDOM.findDOMNode(this.refs[CANVAS]);
+
+        this[MAP] = new Image;
+        this[MAP].crossOrigin = 'Anonymous';
+        this[MAP].width = this[IMAGE].width;
+        this[MAP].height = this[IMAGE].height;
+        this[MAP].src = this.refs[MAP].props.src;
 
         this[CONTEXT] = this[BUFFER].getContext('2d');
 
@@ -63,6 +68,7 @@ class Labyrinth extends Component {
         var playerY = this.state.playerY;
 
         if (!this[PLAYER]) return;
+        if (!this.state.started) return;
 
         if (this.props.input.up) playerY -= this.props.speed;
         if (this.props.input.down) playerY += this.props.speed;

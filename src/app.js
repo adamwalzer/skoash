@@ -12,6 +12,7 @@ import MediaSequence from 'components/media_sequence';
 import ListItem from 'components/list_item';
 
 // new components
+import Animation from 'components/animation';
 import DPad from 'components/d_pad';
 import GameEmbedder from 'components/game_embedder';
 import InteractiveItem from 'components/interactive_item';
@@ -25,6 +26,7 @@ import ScrollArea from 'components/scroll_area';
 import Selectable from 'components/selectable';
 import Slider from 'components/slider';
 import Sprite from 'components/sprite';
+import SpriteCSS from 'components/sprite_css';
 import SpriteAnimation from 'components/sprite_animation';
 import Timer from 'components/timer';
 
@@ -53,6 +55,7 @@ window.$k = window.skoash = {
     MediaSequence,
     ListItem,
     // new components
+    Animation,
     DPad,
     GameEmbedder,
     InteractiveItem,
@@ -66,6 +69,7 @@ window.$k = window.skoash = {
     Selectable,
     Slider,
     Sprite,
+    SpriteCSS,
     SpriteAnimation,
     Timer,
     // new data components

@@ -19,7 +19,7 @@ class Timer extends Component {
 
         if (!this.props.checkComplete) return;
 
-        if (!this.state.started || this.state.paused) return;
+        if (!this.state.started || this.state.paused || this.props.pause) return;
 
         if (time >= this.state.stamp) {
             this.setState({

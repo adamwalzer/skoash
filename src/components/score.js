@@ -116,10 +116,10 @@ class Score extends Component {
 
     getClassNames() {
         return classNames(
-      'score',
-      `score-${this.state.score}`,
-      super.getClassNames()
-    );
+            'score',
+            `score-${this.state.score}`,
+            super.getClassNames()
+        );
     }
 
     render() {

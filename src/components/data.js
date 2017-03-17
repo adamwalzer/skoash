@@ -12,9 +12,15 @@ class Data extends Component {
     }
 
     loadData(src) {
-        this.loadFile(src, response => {
-            this.data = response;
+        this.loadFile(src, data => {
+            this.data = data;
             this.ready();
+            if (this.props.dataTarget) {
+                this.updateGameData({
+                    key: this.props.dataTarget,
+                    data,
+                });
+            }
         });
     }
 
