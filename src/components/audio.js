@@ -141,9 +141,11 @@ class Audio extends Media {
     }
 
     unload() {
+        this.stop();
         if (!this.audio) return;
         _.invoke(this, 'audio.unload');
         delete this.audio;
+        this.setState({ready: this.props.ready || false});
     }
 
     componentWillUnmount() {
