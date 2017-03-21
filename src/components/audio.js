@@ -141,9 +141,17 @@ class Audio extends Media {
     }
 
     unload() {
-        this.stop();
+        skoash.trigger('audioStop', {
+            audio: this
+        });
+        this.playing = false;
+        this.paused = false;
+
         if (!this.audio) return;
+
+        _.invoke(this, 'audio.stop', this.sprite);
         _.invoke(this, 'audio.unload');
+
         delete this.audio;
         this.setState({ready: this.props.ready || false});
     }
