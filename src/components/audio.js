@@ -74,12 +74,14 @@ class Audio extends Media {
         if (!this.playing && !this.delayed) return;
         if (!this.audio) return;
 
+        this.playing = false;
+        this.paused = false;
+
+        _.invoke(this, 'audio.stop', this.sprite);
+
         skoash.trigger('audioStop', {
             audio: this
         });
-        this.playing = false;
-        this.paused = false;
-        _.invoke(this, 'audio.stop', this.sprite);
     }
 
     setVolume(volume) {
@@ -104,14 +106,13 @@ class Audio extends Media {
         props = _.defaults(props || {}, this.props);
 
         if (!props.loop) {
+            this.playing = false;
             skoash.trigger('audioStop', {
                 audio: this
             });
         }
 
-        if (!props.complete && (!this.playing || this.paused)) return;
-
-        if (!props.loop) this.playing = false;
+        if (!props.complete && this.paused) return;
 
         super.complete();
     }
@@ -141,11 +142,11 @@ class Audio extends Media {
     }
 
     unload() {
+        this.playing = false;
+        this.paused = false;
         skoash.trigger('audioStop', {
             audio: this
         });
-        this.playing = false;
-        this.paused = false;
 
         if (!this.audio) return;
 
