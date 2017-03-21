@@ -18,6 +18,8 @@ class Selectable extends Component {
 
         super.start();
 
+        if (this.props.resetClassesOnStart) classes = {};
+
         selectFunction = this.props.selectClass === 'HIGHLIGHTED' ? this.highlight : this.select;
 
         if (this.props.selectOnStart) {
@@ -179,6 +181,7 @@ Selectable.defaultProps = _.defaults({
     selectClass: 'SELECTED',
     completeListOnClick: true,
     onSelect: _.noop,
+    resetClassesOnStart: false,
 }, Component.defaultProps);
 
 export default Selectable;
