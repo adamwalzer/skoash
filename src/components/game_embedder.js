@@ -6,6 +6,7 @@ class GameEmbedder extends Component {
 
         this.respond = this.respond.bind(this);
         this.onLoad = this.onLoad.bind(this);
+        this.onLoadHelper = this.onLoadHelper.bind(this);
     }
 
     bootstrap() {
@@ -38,6 +39,10 @@ class GameEmbedder extends Component {
         });
     }
 
+    onLoadHelper() {
+        this.props.onLoad.call(this);
+    }
+
     onLoad() {
         this.emitEvent({
             name: 'focus',
@@ -45,9 +50,7 @@ class GameEmbedder extends Component {
 
         this.setState({
             loaded: true,
-        }, () => {
-            this.props.onLoad.call(this);
-        });
+        }, this.onLoadHelper);
     }
 
     pause() {
