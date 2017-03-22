@@ -10,6 +10,8 @@ class Selectable extends Component {
             classes: {},
             selectFunction: this.select,
         };
+
+        this.renderListHelper = this.renderListHelper.bind(this);
     }
 
     start() {

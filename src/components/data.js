@@ -7,10 +7,10 @@ class Data extends Component {
 
         this.state.ready = false;
 
+        this.loadDataHelper = this.loadDataHelper.bind(this);
+
         this.loadFile = util.loadFile;
         this.loadData(props.src);
-
-        this.loadDataHelper = this.loadDataHelper.bind(this);
     }
 
     loadDataHelper(data) {

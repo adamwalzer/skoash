@@ -14,6 +14,7 @@ class Reveal extends Component {
         this.index = 0;
 
         this.close = this.close.bind(this);
+        this.renderListHelper = this.renderListHelper.bind(this);
     }
 
     incomplete() {
@@ -181,7 +182,8 @@ class Reveal extends Component {
         return classes;
     }
 
-    getClassNamesHelper(a, ref) {
+    revealGetClassNamesHelper(a, ref) {
+        if (!ref || !_.isString(ref)) return a;
         return a + ' open-' + ref;
     }
 
@@ -190,7 +192,7 @@ class Reveal extends Component {
         var open = 'open-none';
 
         if (this.state.open) {
-            open = _.reduce(this.state.currentlyOpen, this.getClassNamesHelper, '');
+            open = _.reduce(this.state.currentlyOpen, this.revealGetClassNamesHelper, '');
         }
 
         classes = classNames(
