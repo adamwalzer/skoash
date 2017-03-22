@@ -20,23 +20,47 @@ class SpriteCss extends Component {
 
     setUp() {
         if (this.data && this.data.frames) {
-            let minX = _.reduce(this.data.frames, (a, v) => Math.min(a, v.spriteSourceSize.x), Infinity);
-            let minY = _.reduce(this.data.frames, (a, v) => Math.min(a, v.spriteSourceSize.y), Infinity);
-            let maxWidth = _.reduce(this.data.frames, (a, v) =>
-                Math.max(a, v.spriteSourceSize.x + v.spriteSourceSize.w - minX), 0);
-            let maxHeight = _.reduce(this.data.frames, (a, v) =>
-                Math.max(a, v.spriteSourceSize.y + v.spriteSourceSize.h - minY), 0);
+            let spriteGroup = Math.min(this.props.spriteGroup, this.data.frames.length);
+            let minXs = _.reduce(this.data.frames, (a, v, k) => {
+                let i = Math.floor(k / spriteGroup);
+                let curr = i >= a.length ? Infinity : a[i];
+                a[i] = Math.min(curr, v.spriteSourceSize.x);
+                return a;
+            }, []);
+            let minYs = _.reduce(this.data.frames, (a, v, k) => {
+                let i = Math.floor(k / spriteGroup);
+                let curr = i >= a.length ? Infinity : a[i];
+                a[i] = Math.min(curr, v.spriteSourceSize.y);
+                return a;
+            }, []);
+            let maxWidths = _.reduce(this.data.frames, (a, v, k) => {
+                let i = Math.floor(k / spriteGroup);
+                let curr = i >= a.length ? 0 : a[i];
+                a[i] = Math.max(curr, v.spriteSourceSize.x + v.spriteSourceSize.w - minXs[i]);
+                return a;
+            }, []);
+            let maxHeights = _.reduce(this.data.frames, (a, v, k) => {
+                let i = Math.floor(k / spriteGroup);
+                let curr = i >= a.length ? 0 : a[i];
+                a[i] = Math.max(curr, v.spriteSourceSize.y + v.spriteSourceSize.h - minYs[i]);
+                return a;
+            }, []);
 
             let styleText = `.${this.props.spriteClass}` +
-                `{ display: inline-block; position: relative; width: ${maxWidth}px; height: ${maxHeight}px }`;
+                '{ display: inline-block; position: relative; }';
 
             styleText = _.reduce(this.data.frames, (text, frameData, k) =>
                 text +
                 `.${this.props.spriteClass}` +
+                `${(this.props.frameSelectors[k] || `.frame-${k}`)} {` +
+                `width: ${maxWidths[Math.floor(k / spriteGroup)]};` +
+                `height: ${maxHeights[Math.floor(k / spriteGroup)]}` +
+                '}' +
+                `.${this.props.spriteClass}` +
                 `${(this.props.frameSelectors[k] || `.frame-${k}`) + '::before'} {` +
                 'position: absolute;' +
-                `top: ${frameData.spriteSourceSize.y - minY}px;` +
-                `left: ${frameData.spriteSourceSize.x - minX}px;` +
+                `top: ${frameData.spriteSourceSize.y - minYs[Math.floor(k / spriteGroup)]}px;` +
+                `left: ${frameData.spriteSourceSize.x - minXs[Math.floor(k / spriteGroup)]}px;` +
                 `background-image: url(${this.props.src}.${this.props.extension});` +
                 'background-repeat: no-repeat;' +
                 `background-position: -${frameData.frame.x}px -${frameData.frame.y}px;` +
@@ -105,6 +129,7 @@ SpriteCss.defaultProps = _.defaults({
     spriteClass: 'css-sprite',
     frameSelectors: {},
     onSetUp: _.noop,
+    spriteGroup: Infinity,
 }, Component.defaultProps);
 
 export default SpriteCss;
