@@ -14,6 +14,14 @@ class Component extends React.Component {
         this.start = _.throttle(this.start.bind(this), 100);
         this.ready = _.throttle(this.ready.bind(this), 100);
         this.complete = _.throttle(this.complete.bind(this), 100);
+
+        this.incompleteHelper = this.incompleteHelper.bind(this);
+        this.readyHelper = this.readyHelper.bind(this);
+        this.stopHelper = this.stopHelper.bind(this);
+        this.openHelper = this.openHelper.bind(this);
+        this.openHelper = this.openHelper.bind(this);
+        this.closeHelper = this.closeHelper.bind(this);
+        this.collectMediaHelper = this.collectMediaHelper.bind(this);
     }
 
     trigger() {
@@ -38,15 +46,17 @@ class Component extends React.Component {
         }, props.completeDelay);
     }
 
+    incompleteHelper() {
+        this.trigger('incomplete');
+        this.props.onIncomplete.call(this, this);
+    }
+
     incomplete() {
         if (!this.state.complete || this.props.complete) return;
 
         this.setState({
             complete: false,
-        }, () => {
-            this.trigger('incomplete');
-            this.props.onIncomplete.call(this, this);
-        });
+        }, this.incompleteHelper);
     }
 
     completeRefs() {
@@ -59,20 +69,22 @@ class Component extends React.Component {
         this.incomplete();
     }
 
+    readyHelper() {
+        if (this.props.triggerReady) this.trigger('ready');
+        if (this.state.open) this.start();
+        if (_.isFunction(this.onReadyCallback)) {
+            _.invoke(this, 'onReadyCallback.call', this);
+            delete this.onReadyCallback;
+        } else {
+            _.invoke(this, 'onReady.call', this);
+        }
+        this.props.onReady.call(this);
+    }
+
     ready() {
         this.setState({
             ready: true,
-        }, () => {
-            if (this.props.triggerReady) this.trigger('ready');
-            if (this.state.open) this.start();
-            if (_.isFunction(this.onReadyCallback)) {
-                _.invoke(this, 'onReadyCallback.call', this);
-                delete this.onReadyCallback;
-            } else {
-                _.invoke(this, 'onReady.call', this);
-            }
-            this.props.onReady.call(this);
-        });
+        }, this.readyHelper);
     }
 
     start(callback) {
@@ -91,13 +103,15 @@ class Component extends React.Component {
         });
     }
 
+    stopHelper() {
+        this.invokeChildrenFunction('stop');
+        this.props.onStop.call(this);
+    }
+
     stop() {
         this.setState({
             started: false
-        }, () => {
-            this.invokeChildrenFunction('stop');
-            this.props.onStop.call(this);
-        });
+        }, this.stopHelper);
     }
 
     pause() {
@@ -110,20 +124,24 @@ class Component extends React.Component {
         this.props.onResume.call(this);
     }
 
+    openHelper() {
+        this.props.onOpen.call(this);
+    }
+
     open() {
         this.setState({
             open: true
-        }, () => {
-            this.props.onOpen.call(this);
-        });
+        }, this.openHelper);
+    }
+
+    closeHelper() {
+        this.props.onClose.call(this);
     }
 
     close() {
         this.setState({
             open: false
-        }, () => {
-            this.props.onClose.call(this);
-        });
+        }, this.closeHelper);
     }
 
     componentDidMount() {
@@ -151,6 +169,12 @@ class Component extends React.Component {
         if (this.metaData) return this.props.loadData.call(this, this.metaData);
     }
 
+    collectMediaHelper(ref, key) {
+        if (ref instanceof skoash.Video) this.collectVideo(key);
+        if (ref instanceof skoash.Audio) this.collectAudio(key);
+        if (ref instanceof skoash.MediaSequence) this.collectMediaSequence(key);
+    }
+
     collectMedia() {
         this.media = {
             video: [],
@@ -162,11 +186,7 @@ class Component extends React.Component {
             sequence: [],
         };
 
-        _.each(this.refs, (ref, key) => {
-            if (ref instanceof skoash.Video) this.collectVideo(key);
-            if (ref instanceof skoash.Audio) this.collectAudio(key);
-            if (ref instanceof skoash.MediaSequence) this.collectMediaSequence(key);
-        });
+        _.each(this.refs, this.collectMediaHelper);
     }
 
     collectVideo(key) {
@@ -203,14 +223,16 @@ class Component extends React.Component {
         }, {});
     }
 
+    checkReadyHelper(ref) {
+        if (!_.get(ref, 'state.ready')) _.invoke(ref, 'checkReady');
+    }
+
     checkReady() {
         var ready;
 
         if (!this.props.checkReady || (!this.props.ignoreReady && this.state.ready)) return;
 
-        _.each(this.refs, ref => {
-            if (!_.get(ref, 'state.ready')) _.invoke(ref, 'checkReady');
-        });
+        _.each(this.refs, this.checkReadyHelper);
 
         ready = !_.size(this.getUnready());
 
@@ -222,7 +244,7 @@ class Component extends React.Component {
 
         if (!this.props.checkComplete || !this.state.ready) return;
 
-        _.each(this.refs, ref => _.invoke(ref, 'checkComplete'));
+        this.invokeChildrenFunction('checkComplete');
 
         complete = !_.size(this.getUnready('complete'));
 
@@ -297,12 +319,14 @@ class Component extends React.Component {
         }, callback);
     }
 
+    getClassNamesHelper(a, v, k) {
+        if (v === true) a[_.toUpper(k)] = v;
+        return a;
+    }
+
     getClassNames() {
         return classNames(
-            _.reduce(this.state, (a, v, k) => {
-                if (v === true) a[_.toUpper(k)] = v;
-                return a;
-            }, {}),
+            _.reduce(this.state, this.getClassNamesHelper, {}),
             this.state.className,
             this.props.className,
             this.props.componentName,
