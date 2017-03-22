@@ -144,25 +144,27 @@ class Selectable extends Component {
         );
     }
 
+    renderListHelper(li, key) {
+        var dataRef = li.props['data-ref'] || key;
+        var ref = li.ref || li.props.id || dataRef;
+        var message = li.props.message || '' + key;
+        return (
+            <li.type
+                {...li.props}
+                type="li"
+                className={this.getClass(key, li)}
+                message={message}
+                data-message={message}
+                data-ref={dataRef}
+                ref={ref}
+                key={key}
+            />
+        );
+    }
+
     renderList() {
         var list = this.props.list || this.state.list || [];
-        return _.map(list, (li, key) => {
-            var dataRef = li.props['data-ref'] || key;
-            var ref = li.ref || li.props.id || dataRef;
-            var message = li.props.message || '' + key;
-            return (
-                <li.type
-                    {...li.props}
-                    type="li"
-                    className={this.getClass(key, li)}
-                    message={message}
-                    data-message={message}
-                    data-ref={dataRef}
-                    ref={ref}
-                    key={key}
-                />
-            );
-        });
+        return _.map(list, this.renderListHelper);
     }
 
     render() {

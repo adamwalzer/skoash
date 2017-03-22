@@ -12,6 +12,8 @@ class Reveal extends Component {
         };
 
         this.index = 0;
+
+        this.close = this.close.bind(this);
     }
 
     incomplete() {
@@ -44,9 +46,7 @@ class Reveal extends Component {
         }
 
         if (this.props.autoClose) {
-            setTimeout(() => {
-                this.close();
-            }, 2000);
+            setTimeout(this.close, 2000);
         }
 
         if (this.props.openTarget) {
@@ -106,40 +106,44 @@ class Reveal extends Component {
         }
     }
 
+    renderAssetsHelper(asset, key) {
+        var ref = asset.ref || asset.props['data-ref'] || 'asset-' + key;
+        return (
+            <asset.type
+                {...asset.props}
+                data-ref={key}
+                ref={ref}
+                key={key}
+            />
+        );
+    }
+
     renderAssets() {
         if (this.props.assets) {
-            return this.props.assets.map((asset, key) => {
-                var ref = asset.ref || asset.props['data-ref'] || 'asset-' + key;
-                return (
-                    <asset.type
-                        {...asset.props}
-                        data-ref={key}
-                        ref={ref}
-                        key={key}
-                    />
-                );
-            });
+            return this.props.assets.map(this.renderAssetsHelper);
         }
 
         return null;
     }
 
+    renderListHelper(li, key) {
+        var ref = li.ref || li.props['data-ref'] || key;
+        return (
+            <li.type
+                {...li.props}
+                type="li"
+                className={this.getClass(li, key)}
+                data-ref={ref}
+                ref={ref}
+                key={key}
+            />
+        );
+    }
+
     renderList() {
         var list = this.props.list;
 
-        return list.map((li, key) => {
-            var ref = li.ref || li.props['data-ref'] || key;
-            return (
-                <li.type
-                    {...li.props}
-                    type="li"
-                    className={this.getClass(li, key)}
-                    data-ref={ref}
-                    ref={ref}
-                    key={key}
-                />
-            );
-        });
+        return list.map(this.renderListHelper);
     }
 
     componentWillReceiveProps(props) {
@@ -177,15 +181,16 @@ class Reveal extends Component {
         return classes;
     }
 
+    getClassNamesHelper(a, ref) {
+        return a + ' open-' + ref;
+    }
+
     getClassNames() {
         var classes;
         var open = 'open-none';
 
         if (this.state.open) {
-            open = '';
-            _.each(this.state.currentlyOpen, ref => {
-                open += 'open-' + ref;
-            });
+            open = _.reduce(this.state.currentlyOpen, this.getClassNamesHelper, '');
         }
 
         classes = classNames(
