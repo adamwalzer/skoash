@@ -1,4 +1,4 @@
-import Asset from './asset.js';
+import Asset from './asset';
 
 class Image extends Asset {
     bootstrap() {
