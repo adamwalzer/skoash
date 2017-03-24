@@ -53,8 +53,8 @@ class SpriteCss extends Component {
                 text +
                 `.${this.props.spriteClass}` +
                 `${(this.props.frameSelectors[k] || `.frame-${k}`)} {` +
-                `width: ${maxWidths[Math.floor(k / spriteGroup)]};` +
-                `height: ${maxHeights[Math.floor(k / spriteGroup)]}` +
+                `width: ${maxWidths[Math.floor(k / spriteGroup)]}px;` +
+                `height: ${maxHeights[Math.floor(k / spriteGroup)]}px;` +
                 '}' +
                 `.${this.props.spriteClass}` +
                 `${(this.props.frameSelectors[k] || `.frame-${k}`) + '::before'} {` +
