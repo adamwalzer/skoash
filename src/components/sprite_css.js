@@ -116,7 +116,7 @@ class SpriteCss extends Component {
         return (
             <Image
                 ref="image"
-                src={`${this.props.dataSrc || this.props.src}.${this.props.extension}`}
+                src={`${this.props.src}.${this.props.extension}`}
             />
         );
     }
