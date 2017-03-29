@@ -1,3 +1,5 @@
+import classNames from 'classnames';
+
 import Component from 'components/component';
 
 class Screen extends Component {
@@ -239,14 +241,20 @@ Screen.defaultProps = _.defaults({
     hideNext: false,
     renderPrevButton: function () {
         return (
-            <button className="prev-screen" onClick={this.prev}>
+            <button
+                className={classNames('prev-screen', this.props.prevButtonClassName)}
+                onClick={this.prev}
+            >
                 {this.props.prevContent}
             </button>
         );
     },
     renderNextButton: function () {
         return (
-            <button className="next-screen" onClick={this.next}>
+            <button
+                className={classNames('next-screen', this.props.nextButtonClassName)}
+                onClick={this.next}
+            >
                 {this.props.nextContent}
             </button>
         );

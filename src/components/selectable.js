@@ -18,6 +18,8 @@ class Selectable extends Component {
 
         super.start();
 
+        if (this.props.resetClassesOnStart) classes = {};
+
         selectFunction = this.props.selectClass === 'HIGHLIGHTED' ? this.highlight : this.select;
 
         if (this.props.selectOnStart) {
@@ -39,6 +41,13 @@ class Selectable extends Component {
                 list: this.refs.bin.getAll()
             });
         }
+    }
+
+    incompleteRefs() {
+        super.incompleteRefs();
+        this.setState({
+            classes: {},
+        });
     }
 
     selectHelper(e, classes) {
@@ -73,7 +82,7 @@ class Selectable extends Component {
             classes,
         });
 
-        this.props.onSelect.call(this, dataRef);
+        this.props.onSelect.call(this, dataRef, isCorrect);
 
         if (this.props.chooseOne) this.complete();
 
@@ -172,6 +181,7 @@ Selectable.defaultProps = _.defaults({
     selectClass: 'SELECTED',
     completeListOnClick: true,
     onSelect: _.noop,
+    resetClassesOnStart: false,
 }, Component.defaultProps);
 
 export default Selectable;

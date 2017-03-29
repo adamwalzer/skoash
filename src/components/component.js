@@ -250,6 +250,14 @@ class Component extends React.Component {
             this.complete(props);
         }
 
+        if (props.completeRefs === true && props.completeRef !== this.props.completeRef) {
+            this.completeRefs();
+        }
+
+        if (props.incompleteRefs === true && props.incompleteRefs !== this.props.incompleteRefs) {
+            this.incompleteRefs();
+        }
+
         if (props.start === true && props.start !== this.props.start) {
             this.start();
         }
