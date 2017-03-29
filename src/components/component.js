@@ -16,6 +16,10 @@ class Component extends React.Component {
         this.complete = _.throttle(this.complete.bind(this), 100);
     }
 
+    trigger() {
+        return skoash.trigger.apply(null, arguments);
+    }
+
     invokeChildrenFunction(functionName, opts) {
         _.each(this.refs, ref => {
             _.invoke(ref, functionName, opts);
@@ -28,7 +32,7 @@ class Component extends React.Component {
             this.setState({
                 complete: true,
             }, () => {
-                skoash.trigger('complete');
+                this.trigger('complete');
                 props.onComplete.call(this, this);
             });
         }, props.completeDelay);
@@ -40,7 +44,7 @@ class Component extends React.Component {
         this.setState({
             complete: false,
         }, () => {
-            skoash.trigger('incomplete');
+            this.trigger('incomplete');
             this.props.onIncomplete.call(this, this);
         });
     }
@@ -59,7 +63,7 @@ class Component extends React.Component {
         this.setState({
             ready: true,
         }, () => {
-            if (this.props.triggerReady) skoash.trigger('ready');
+            if (this.props.triggerReady) this.trigger('ready');
             if (this.state.open) this.start();
             if (_.isFunction(this.onReadyCallback)) {
                 _.invoke(this, 'onReadyCallback.call', this);
@@ -230,15 +234,15 @@ class Component extends React.Component {
     }
 
     updateGameState(opts) {
-        return skoash.trigger('updateState', opts);
+        return this.trigger('updateState', opts);
     }
 
     updateGameData(opts) {
-        return skoash.trigger('updateGameData', opts);
+        return this.trigger('updateGameData', opts);
     }
 
     updateScreenData(opts) {
-        return skoash.trigger('updateScreenData', opts);
+        return this.trigger('updateScreenData', opts);
     }
 
     shouldComponentUpdate(nextProps, nextState) {

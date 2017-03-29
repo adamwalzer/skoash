@@ -1,6 +1,6 @@
 {
   "name": "skoash",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "CMWN Games Framework (SkoashJS)",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
     "babel-polyfill": "^6.0.16",
     "classnames": "^2.2.5",
     "fontfaceobserver": "^2.0.5",
-    "howler": "1.1.29",
+    "howler": "^2.0.3",
     "isomorphic-fetch": "^2.2.1",
     "react": "^0.14.2",
     "react-addons-update": "^0.14.2",
