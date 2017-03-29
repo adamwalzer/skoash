@@ -100,7 +100,9 @@ class Reveal extends Component {
         super.start();
 
         if (this.props.prevButtonClassName) {
+            /* eslint-disable no-console */
             console.warn('As of skoash 1.1.7, closeButtonClassName prop should be used');
+            /* eslint-enable no-console */
         }
 
         if (this.props.openOnStart != null) {
