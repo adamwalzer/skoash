@@ -11,15 +11,18 @@ class Asset extends Component {
         this.state.ready = props.ready;
 
         this.error = this.error.bind(this);
+        this.errorHelper = this.errorHelper.bind(this);
+    }
+
+    errorHelper() {
+        this.props.onError.call(this);
     }
 
     error() {
         this.setState({
             error: true,
             ready: this.props.ready
-        }, () => {
-            this.props.onError.call(this);
-        });
+        }, this.errorHelper);
     }
 }
 

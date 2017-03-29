@@ -12,6 +12,9 @@ class Reveal extends Component {
         };
 
         this.index = 0;
+
+        this.close = this.close.bind(this);
+        this.renderListHelper = this.renderListHelper.bind(this);
     }
 
     incomplete() {
@@ -44,9 +47,7 @@ class Reveal extends Component {
         }
 
         if (this.props.autoClose) {
-            setTimeout(() => {
-                this.close();
-            }, 2000);
+            setTimeout(this.close, 2000);
         }
 
         if (this.props.openTarget) {
@@ -97,6 +98,11 @@ class Reveal extends Component {
 
     start() {
         super.start();
+
+        if (this.props.prevButtonClassName) {
+            console.warn('As of skoash 1.1.7, closeButtonClassName prop should be used');
+        }
+
         if (this.props.openOnStart != null) {
             this.open(this.props.openOnStart);
         } else if (this.props.start && typeof this.props.start === 'function') {
@@ -106,40 +112,44 @@ class Reveal extends Component {
         }
     }
 
+    renderAssetsHelper(asset, key) {
+        var ref = asset.ref || asset.props['data-ref'] || 'asset-' + key;
+        return (
+            <asset.type
+                {...asset.props}
+                data-ref={key}
+                ref={ref}
+                key={key}
+            />
+        );
+    }
+
     renderAssets() {
         if (this.props.assets) {
-            return this.props.assets.map((asset, key) => {
-                var ref = asset.ref || asset.props['data-ref'] || 'asset-' + key;
-                return (
-                    <asset.type
-                        {...asset.props}
-                        data-ref={key}
-                        ref={ref}
-                        key={key}
-                    />
-                );
-            });
+            return this.props.assets.map(this.renderAssetsHelper);
         }
 
         return null;
     }
 
+    renderListHelper(li, key) {
+        var ref = li.ref || li.props['data-ref'] || key;
+        return (
+            <li.type
+                {...li.props}
+                type="li"
+                className={this.getClass(li, key)}
+                data-ref={ref}
+                ref={ref}
+                key={key}
+            />
+        );
+    }
+
     renderList() {
         var list = this.props.list;
 
-        return list.map((li, key) => {
-            var ref = li.ref || li.props['data-ref'] || key;
-            return (
-                <li.type
-                    {...li.props}
-                    type="li"
-                    className={this.getClass(li, key)}
-                    data-ref={ref}
-                    ref={ref}
-                    key={key}
-                />
-            );
-        });
+        return list.map(this.renderListHelper);
     }
 
     componentWillReceiveProps(props) {
@@ -177,15 +187,17 @@ class Reveal extends Component {
         return classes;
     }
 
+    revealGetClassNamesHelper(a, ref) {
+        if (!ref || !_.isString(ref)) return a;
+        return a + ' open-' + ref;
+    }
+
     getClassNames() {
         var classes;
         var open = 'open-none';
 
         if (this.state.open) {
-            open = '';
-            _.each(this.state.currentlyOpen, ref => {
-                open += 'open-' + ref;
-            });
+            open = _.reduce(this.state.currentlyOpen, this.revealGetClassNamesHelper, '');
         }
 
         classes = classNames(
@@ -231,7 +243,12 @@ Reveal.defaultProps = _.defaults({
     renderCloseButton: function () {
         return (
             <button
-                className={classNames('close-reveal', this.props.prevButtonClassName)}
+                className={classNames(
+                    'navigation',
+                    'close-reveal',
+                    this.props.closeButtonClassName,
+                    this.props.prevButtonClassName,
+                ) /* prevButtonClassName to be removed */ }
                 onClick={this.close.bind(this)}
             >
                 {this.props.closeButtonContent}

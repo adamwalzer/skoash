@@ -41,6 +41,10 @@ class Game extends Component {
         this.deviceDetector = new DeviceDetector(this);
         this.mediaManager = new MediaManager(this);
         this.navigator = new Navigator(this);
+
+        this.readyHelper = this.readyHelper.bind(this);
+        this.renderScreensHelper = this.renderScreensHelper.bind(this);
+        this.renderMenuScreensHelper = this.renderMenuScreensHelper.bind(this);
     }
 
     getState(opts = {}) {
@@ -76,23 +80,25 @@ class Game extends Component {
         this.props.onBootstrap.call(this);
     }
 
+    readyHelper() {
+        this.eventManager.emit({
+            name: 'ready',
+            game: this.props.config.id,
+        });
+        this.navigator.goto({
+            index: this.state.currentScreenIndex,
+            silent: true,
+        });
+        this.onReady.call(this);
+        this.props.onReady.call(this);
+    }
+
     ready() {
         if (this.state.ready || this.isReady) return;
         this.isReady = true;
         this.setState({
             ready: true,
-        }, () => {
-            this.eventManager.emit({
-                name: 'ready',
-                game: this.props.config.id,
-            });
-            this.navigator.goto({
-                index: this.state.currentScreenIndex,
-                silent: true,
-            });
-            this.onReady.call(this);
-            this.props.onReady.call(this);
-        });
+        }, this.readyHelper);
     }
 
     resume() {
@@ -263,45 +269,47 @@ class Game extends Component {
         };
     }
 
-    renderScreens() {
-        return _.map(Object.keys(this.props.screens), (key, index) => {
-            // data will eventually be removed from screen props
+    renderScreensHelper(key, index) {
+        // data will eventually be removed from screen props
+        // in favor of passing it in as a param to the screen function
+        let data = this.state.data.screens[key];
+        let props = _.defaults({
+            data,
+            load: this.state.screenLoads[key],
+            prevButtonClassName: _.isString(this.props.prevButtonClassName) ?
+                this.props.prevButtonClassName : this.props.prevButtonClassName[key],
+            nextButtonClassName: _.isString(this.props.nextButtonClassName) ?
+                this.props.nextButtonClassName : this.props.nextButtonClassName[key],
+            // gameState will eventually be removed from screen props
             // in favor of passing it in as a param to the screen function
-            let data = this.state.data.screens[key];
-            let props = _.defaults({
-                data,
-                load: this.state.screenLoads[key],
-                prevButtonClassName: _.isString(this.props.prevButtonClassName) ?
-                    this.props.prevButtonClassName : this.props.prevButtonClassName[key],
-                nextButtonClassName: _.isString(this.props.nextButtonClassName) ?
-                    this.props.nextButtonClassName : this.props.nextButtonClassName[key],
-                // gameState will eventually be removed from screen props
-                // in favor of passing it in as a param to the screen function
-                gameState: this.state,
-                index,
-            }, this.props.screens[key].props);
+            gameState: this.state,
+            index,
+        }, this.props.screens[key].props);
 
-            if (
-                !props.load &&
-                _.isNumber(_.parseInt(key)) &&
-                Math.abs(this.state.currentScreenIndex - index) > this.props.screenBufferAmount
-            ) {
-                return null;
-            }
+        if (
+            !props.load &&
+            _.isNumber(_.parseInt(key)) &&
+            Math.abs(this.state.currentScreenIndex - index) > this.props.screenBufferAmount
+        ) {
+            return null;
+        }
 
-            return this.props.screens[key](
-                props,
-                `screen-${key}`,
-                key,
-                _.get(this, `state.content.screens.${key}`),
-                this.state,
-                data
-            );
-        });
+        return this.props.screens[key](
+            props,
+            `screen-${key}`,
+            key,
+            _.get(this, `state.content.screens.${key}`),
+            this.state,
+            data
+        );
     }
 
-    renderMenuScreens() {
-        return _.map(this.props.menus, (Menu, key) =>
+    renderScreens() {
+        return _.map(Object.keys(this.props.screens), this.renderScreensHelper);
+    }
+
+    renderMenuScreensHelper(Menu, key) {
+        return (
             <Menu.type
                 {...Menu.props}
                 gameState={this.state}
@@ -310,6 +318,10 @@ class Game extends Component {
                 ref={`menu-${key}`}
             />
         );
+    }
+
+    renderMenuScreens() {
+        return _.map(this.props.menus, this.renderMenuScreensHelper);
     }
 
     render() {
@@ -352,7 +364,10 @@ Game.defaultProps = _.defaults({
     renderMenu: function () {
         return (
             <div className="menu">
-                <button className="close" onClick={this.navigator.openMenu.bind(this, {id: 'quit'})} />
+                <button
+                    className={classNames('navigation', 'close', this.props.closeButtonClassName)}
+                    onClick={this.navigator.openMenu.bind(this, {id: 'quit'})}
+                />
             </div>
         );
     },

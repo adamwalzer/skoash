@@ -11,6 +11,12 @@ class SpriteCss extends Component {
         }, this.state);
 
         this.onJSONReady = this.onJSONReady.bind(this);
+        this.postSetUp = this.postSetUp.bind(this);
+        this.minXHelper = this.minXHelper.bind(this);
+        this.minYHelper = this.minYHelper.bind(this);
+        this.maxWidthsHelper = this.maxWidthsHelper.bind(this);
+        this.maxHeightsHelper = this.maxHeightsHelper.bind(this);
+        this.styleTextHelper = this.styleTextHelper.bind(this);
     }
 
     onJSONReady() {
@@ -18,40 +24,80 @@ class SpriteCss extends Component {
         this.setUp();
     }
 
+    postSetUp() {
+        this.props.onSetUp.call(this);
+    }
+
+    minXHelper(a, v, k) {
+        let i = Math.floor(k / this.spriteGroup);
+        let curr = i >= a.length ? Infinity : a[i];
+        a[i] = Math.min(curr, v.spriteSourceSize.x);
+        return a;
+    }
+
+    minYHelper(a, v, k) {
+        let i = Math.floor(k / this.spriteGroup);
+        let curr = i >= a.length ? Infinity : a[i];
+        a[i] = Math.min(curr, v.spriteSourceSize.y);
+        return a;
+    }
+
+    maxWidthsHelper(a, v, k) {
+        let i = Math.floor(k / this.spriteGroup);
+        let curr = i >= a.length ? 0 : a[i];
+        a[i] = Math.max(curr, v.spriteSourceSize.x + v.spriteSourceSize.w - this.minXs[i]);
+        return a;
+    }
+
+    maxHeightsHelper(a, v, k) {
+        let i = Math.floor(k / this.spriteGroup);
+        let curr = i >= a.length ? 0 : a[i];
+        a[i] = Math.max(curr, v.spriteSourceSize.y + v.spriteSourceSize.h - this.minYs[i]);
+        return a;
+    }
+
+    styleTextHelper(text, frameData, k) {
+        return (
+            text +
+            `.${this.props.spriteClass}` +
+            `${(this.props.frameSelectors[k] || `.frame-${k}`)} {` +
+            `width: ${this.maxWidths[Math.floor(k / this.spriteGroup)]}px;` +
+            `height: ${this.maxHeights[Math.floor(k / this.spriteGroup)]}px;` +
+            '}' +
+            `.${this.props.spriteClass}` +
+            `${(this.props.frameSelectors[k] || `.frame-${k}`) + '::before'} {` +
+            'position: absolute;' +
+            `top: ${frameData.spriteSourceSize.y - this.minYs[Math.floor(k / this.spriteGroup)]}px;` +
+            `left: ${frameData.spriteSourceSize.x - this.minXs[Math.floor(k / this.spriteGroup)]}px;` +
+            `background-image: url(${this.props.src}.${this.props.extension});` +
+            'background-repeat: no-repeat;' +
+            `background-position: -${frameData.frame.x}px -${frameData.frame.y}px;` +
+            `background-size: ${this.data.meta.size.w}px ${this.data.meta.size.h}px;` +
+            `width: ${frameData.frame.w}px;` +
+            `height: ${frameData.frame.h}px;` +
+            'content: \'\';' +
+            '}'
+        );
+    }
+
     setUp() {
         if (this.data && this.data.frames) {
-            let minX = _.reduce(this.data.frames, (a, v) => Math.min(a, v.spriteSourceSize.x), Infinity);
-            let minY = _.reduce(this.data.frames, (a, v) => Math.min(a, v.spriteSourceSize.y), Infinity);
-            let maxWidth = _.reduce(this.data.frames, (a, v) =>
-                Math.max(a, v.spriteSourceSize.x + v.spriteSourceSize.w - minX), 0);
-            let maxHeight = _.reduce(this.data.frames, (a, v) =>
-                Math.max(a, v.spriteSourceSize.y + v.spriteSourceSize.h - minY), 0);
+            let styleText;
 
-            let styleText = `.${this.props.spriteClass}` +
-                `{ display: inline-block; position: relative; width: ${maxWidth}px; height: ${maxHeight}px }`;
+            this.spriteGroup = Math.min(this.props.spriteGroup, this.data.frames.length);
+            this.minXs = _.reduce(this.data.frames, this.minXHelper, []);
+            this.minYs = _.reduce(this.data.frames, this.minYHelper, []);
+            this.maxWidths = _.reduce(this.data.frames, this.maxWidthsHelper, []);
+            this.maxHeights = _.reduce(this.data.frames, this.maxHeightsHelper, []);
 
-            styleText = _.reduce(this.data.frames, (text, frameData, k) =>
-                text +
-                `.${this.props.spriteClass}` +
-                `${(this.props.frameSelectors[k] || `.frame-${k}`) + '::before'} {` +
-                'position: absolute;' +
-                `top: ${frameData.spriteSourceSize.y - minY}px;` +
-                `left: ${frameData.spriteSourceSize.x - minX}px;` +
-                `background-image: url(${this.props.src}.${this.props.extension});` +
-                'background-repeat: no-repeat;' +
-                `background-position: -${frameData.frame.x}px -${frameData.frame.y}px;` +
-                `background-size: ${this.data.meta.size.w}px ${this.data.meta.size.h}px;` +
-                `width: ${frameData.frame.w}px;` +
-                `height: ${frameData.frame.h}px;` +
-                'content: \'\';' +
-                '}'
-            , styleText);
+            styleText = `.${this.props.spriteClass}` +
+                '{ display: inline-block; position: relative; }';
+
+            styleText = _.reduce(this.data.frames, this.styleTextHelper, styleText);
 
             this.setState({
                 styleText
-            }, () => {
-                this.props.onSetUp.call(this);
-            });
+            }, this.postSetUp);
         }
     }
 
@@ -70,7 +116,7 @@ class SpriteCss extends Component {
         return (
             <Image
                 ref="image"
-                src={`${this.props.dataSrc || this.props.src}.${this.props.extension}`}
+                src={`${this.props.src}.${this.props.extension}`}
             />
         );
     }
@@ -105,6 +151,7 @@ SpriteCss.defaultProps = _.defaults({
     spriteClass: 'css-sprite',
     frameSelectors: {},
     onSetUp: _.noop,
+    spriteGroup: Infinity,
 }, Component.defaultProps);
 
 export default SpriteCss;

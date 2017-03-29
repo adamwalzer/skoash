@@ -11,6 +11,8 @@ class Score extends Component {
         };
 
         this.checkComplete = this.checkComplete.bind(this);
+        this.completeHelper = this.completeHelper.bind(this);
+        this.updateScoreHelper = this.updateScoreHelper.bind(this);
     }
 
     checkComplete() {
@@ -28,17 +30,19 @@ class Score extends Component {
         });
     }
 
+    completeHelper() {
+        if (this.props.resetOnComplete) {
+            this.setScore({
+                correct: 0,
+                incorrect: 0,
+            });
+        }
+    }
+
     complete() {
         super.complete();
 
-        setTimeout(() => {
-            if (this.props.resetOnComplete) {
-                this.setScore({
-                    correct: 0,
-                    incorrect: 0,
-                });
-            }
-        }, this.props.completeDelay);
+        setTimeout(this.completeHelper, this.props.completeDelay);
     }
 
     checkScore(props) {
@@ -66,20 +70,22 @@ class Score extends Component {
         this.updateScore(-1 * increment);
     }
 
+    updateScoreHelper() {
+        this.updateScreenData({
+            key: this.props.dataTarget,
+            data: {
+                score: this.state.score
+            }
+        });
+
+        this.checkScore(this.props);
+        this.props.onUpdateScore.call(this, this.state.score);
+    }
+
     updateScore(increment) {
         this.setState({
             score: this.state.score + increment
-        }, () => {
-            this.updateScreenData({
-                key: this.props.dataTarget,
-                data: {
-                    score: this.state.score
-                }
-            });
-
-            this.checkScore(this.props);
-            this.props.onUpdateScore.call(this, this.state.score);
-        });
+        }, this.updateScoreHelper);
     }
 
     setScore(props) {
