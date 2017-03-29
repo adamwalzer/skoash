@@ -13,7 +13,7 @@ class Video extends Media {
         * In order for videos to play on mobile devices,
         * the screen must have prop.startDelay=0
         */
-        this.video.play();
+        // this.video.play();
         super.play();
         skoash.trigger('videoPlay', {
             video: this
@@ -27,7 +27,7 @@ class Video extends Media {
     }
 
     stop() {
-        this.video.pause();
+        // this.video.pause();
         skoash.trigger('videoStop', {
             video: this
         });
@@ -35,7 +35,7 @@ class Video extends Media {
     }
 
     pause() {
-        this.video.pause();
+        // this.video.pause();
         this.paused = true;
     }
 
@@ -56,20 +56,29 @@ class Video extends Media {
     }
 
     bootstrap() {
-        this.video = ReactDOM.findDOMNode(this);
-        this.video.load();
+        this.frame = ReactDOM.findDOMNode(this.refs.frame);
+        window.test = this.frame;
+        // window.test = this.frame.getElementsByTagName('VIDEO')[0];
+        // this.video.load();
+        this.ready();
+    }
+
+    getStyle() {
+        return {
+            border: 0,
+            pointerEvents: 'none',
+        };
     }
 
     render() {
         return (
-            <video
+            <iframe
+                ref="frame"
                 {...this.props}
-                onCanPlay={this.ready}
-                onEnded={this.complete}
-                preload="auto"
-                controls={true}
+                style={this.getStyle()}
             />
         );
+                // srcdoc={this.getSrcDoc()}
     }
 }
 

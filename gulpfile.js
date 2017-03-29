@@ -148,6 +148,7 @@ gulp.task('default', ['build', 'watch']);
 gulp.task('watch', function () {
     mode = getMode('development');
     gulp.watch('src/**/*.js', ['build']);
+    gulp.start('build');
 });
 
 /*·.·´`·.·•·.·´`·.·•·.·´`·.·•·.·´JS Build Tasks`·.·•·.·´`·.·•·.·´`·.·•·.·´`·.·•·.·´`·.·*/
