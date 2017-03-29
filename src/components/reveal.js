@@ -98,6 +98,13 @@ class Reveal extends Component {
 
     start() {
         super.start();
+
+        if (this.props.prevButtonClassName) {
+            /* eslint-disable no-console */
+            console.warn('As of skoash 1.1.7, closeButtonClassName prop should be used');
+            /* eslint-enable no-console */
+        }
+
         if (this.props.openOnStart != null) {
             this.open(this.props.openOnStart);
         } else if (this.props.start && typeof this.props.start === 'function') {
@@ -238,7 +245,12 @@ Reveal.defaultProps = _.defaults({
     renderCloseButton: function () {
         return (
             <button
-                className={classNames('close-reveal', this.props.prevButtonClassName)}
+                className={classNames(
+                    'navigation',
+                    'close-reveal',
+                    this.props.closeButtonClassName,
+                    this.props.prevButtonClassName,
+                ) /* prevButtonClassName to be removed */ }
                 onClick={this.close.bind(this)}
             >
                 {this.props.closeButtonContent}

@@ -255,7 +255,7 @@ Screen.defaultProps = _.defaults({
     renderPrevButton: function () {
         return (
             <button
-                className={classNames('prev-screen', this.props.prevButtonClassName)}
+                className={classNames('navigation', 'prev-screen', this.props.prevButtonClassName)}
                 onClick={this.prev}
             >
                 {this.props.prevContent}
@@ -265,15 +265,15 @@ Screen.defaultProps = _.defaults({
     renderNextButton: function () {
         return (
             <button
-                className={classNames('next-screen', this.props.nextButtonClassName)}
+                className={classNames('navigation', 'next-screen', this.props.nextButtonClassName)}
                 onClick={this.next}
             >
                 {this.props.nextContent}
             </button>
         );
     },
-    prevContent: null,
-    nextContent: null,
+    prevContent: <div />,
+    nextContent: <div />,
 }, Component.defaultProps);
 
 export default Screen;
