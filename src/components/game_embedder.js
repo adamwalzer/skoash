@@ -7,6 +7,7 @@ class GameEmbedder extends Component {
         this.respond = this.respond.bind(this);
         this.onLoad = this.onLoad.bind(this);
         this.onLoadHelper = this.onLoadHelper.bind(this);
+        this.onClick = this.onClick.bind(this);
     }
 
     bootstrap() {
@@ -18,7 +19,7 @@ class GameEmbedder extends Component {
 
     respond(opts) {
         if (opts.ready) {
-            this.phaserReady();
+            this.gameReady();
         } else if (opts.complete) {
             this.complete();
         } else if (opts.updateGameState) {
@@ -33,9 +34,9 @@ class GameEmbedder extends Component {
         this.props.onRespond.call(this, opts);
     }
 
-    phaserReady() {
+    gameReady() {
         this.setState({
-            phaserReady: true,
+            gameReady: true,
         });
     }
 
@@ -44,31 +45,45 @@ class GameEmbedder extends Component {
     }
 
     onLoad() {
-        this.emitEvent({
-            name: 'focus',
-        });
-
         this.setState({
             loaded: true,
         }, this.onLoadHelper);
     }
 
+    onClick() {
+        if (!this.props.pauseOnClick) return;
+        if (!this.state.paused) {
+            this.pause();
+        } else {
+            this.resume();
+        }
+    }
+
+    start() {
+        super.start();
+        if (!this.state.gameReady) return;
+        this.setState({paused: false});
+        this.emitEvent({ name: 'start' });
+    }
+
     pause() {
         super.pause();
-        if (!this.state.phaserReady) return;
+        if (!this.state.gameReady) return;
+        this.setState({paused: true});
         this.emitEvent({ name: 'pause' });
     }
 
     resume(force = false) {
         if (this.props.pause && !force) return;
         super.resume();
+        this.setState({paused: false});
         this.emitEvent({ name: 'resume' });
     }
 
     emitEvent(data) {
         var e = new Event('skoash-event');
 
-        if (!this.state.loaded || !this.state.phaserReady) return;
+        if (!this.state.loaded || !this.state.gameReady) return;
 
         e.name = data.name;
         e.data = data;
@@ -110,18 +125,23 @@ class GameEmbedder extends Component {
 
     getStyle() {
         return _.defaults({}, this.props.style, {
+            border: 0,
             pointerEvents: 'none',
         });
     }
 
     render() {
         return (
-            <iframe
-                {...this.props}
-                ref="game"
-                onLoad={this.onLoad}
-                style={this.getStyle()}
-            />
+            <div
+                onClick={this.onClick}
+            >
+                <iframe
+                    {...this.props}
+                    ref="game"
+                    onLoad={this.onLoad}
+                    style={this.getStyle()}
+                />
+            </div>
         );
     }
 }
@@ -131,6 +151,7 @@ GameEmbedder.defaultProps = _.defaults({
     checkComplete: false,
     onLoad: _.noop,
     onRespond: _.noop,
+    pauseOnClick: false,
 }, Component.defaultProps);
 
 export default GameEmbedder;

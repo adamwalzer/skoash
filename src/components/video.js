@@ -57,8 +57,6 @@ class Video extends Media {
 
     bootstrap() {
         this.frame = ReactDOM.findDOMNode(this.refs.frame);
-        window.test = this.frame;
-        // window.test = this.frame.getElementsByTagName('VIDEO')[0];
         // this.video.load();
         this.ready();
     }
@@ -72,13 +70,14 @@ class Video extends Media {
 
     render() {
         return (
-            <iframe
-                ref="frame"
-                {...this.props}
-                style={this.getStyle()}
-            />
+            <div>
+                <iframe
+                    ref="frame"
+                    {...this.props}
+                    style={this.getStyle()}
+                />
+            </div>
         );
-                // srcdoc={this.getSrcDoc()}
     }
 }
 
