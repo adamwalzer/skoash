@@ -1,5 +1,3 @@
-// AJW 20161115
-// Howler 2.0.1 is out. Perhaps we should give it a try.
 import { Howl } from 'howler';
 import Media from './media';
 
@@ -7,8 +5,6 @@ class Audio extends Media {
     constructor(props) {
         super(props);
 
-        this.startCount = 0;
-        this.completeCount = 0;
         this.allowMultiPlay = props.allowMultiPlay || props.type === 'sfx';
 
         this.playAudio = this.playAudio.bind(this);
@@ -39,8 +35,7 @@ class Audio extends Media {
         this.delayed = false;
         this.playing = true;
 
-        this.audio.play(this.sprite);
-        this.startCount++;
+        _.invoke(this, 'audio.play', this.sprite);
         super.play();
     }
 
@@ -50,7 +45,7 @@ class Audio extends Media {
         }
 
         if (!this.playing) return;
-        this.audio.pause();
+        _.invoke(this, 'audio.pause');
         this.paused = true;
     }
 
@@ -60,9 +55,9 @@ class Audio extends Media {
 
             if (this.delayed) {
                 this.timeout = setTimeout(
-          this.playAudio,
-          this.props.delay
-        );
+                    this.playAudio,
+                    this.props.delay
+                );
             }
 
             if (!this.paused) return;
@@ -79,66 +74,63 @@ class Audio extends Media {
         if (!this.playing && !this.delayed) return;
         if (!this.audio) return;
 
+        this.playing = false;
+        this.paused = false;
+
+        _.invoke(this, 'audio.stop', this.sprite);
+
         skoash.trigger('audioStop', {
             audio: this
         });
-        this.playing = false;
-        this.paused = false;
-        this.audio.stop(this.sprite);
     }
 
     setVolume(volume) {
         volume = Math.min(this.props.maxVolume,
             Math.max(this.props.minVolume, volume));
-        this.audio.volume(volume);
+        _.invoke(this, 'audio.volume', volume);
     }
 
     increaseVolume(volume) {
         if (!this.playing) return;
         volume = Math.min(volume || this.props.volume, this.props.maxVolume);
-        this.audio.fadeIn(volume);
+        _.invoke(this, 'audio.fadeIn', volume);
     }
 
     decreaseVolume(volume) {
         if (!this.playing) return;
         volume = Math.max(volume, this.props.minVolume);
-        this.audio.fadeOut(volume);
+        _.invoke(this, 'audio.fadeOut', volume);
     }
 
     complete(props) {
         props = _.defaults(props || {}, this.props);
 
         if (!props.loop) {
+            this.playing = false;
             skoash.trigger('audioStop', {
                 audio: this
             });
         }
 
-        this.completeCount++;
+        if (!props.complete && this.paused) return;
 
-        if (!props.complete && (!this.playing || this.paused)) return;
-        if (this.startCount > this.completeCount) return;
-
-        if (!props.loop) this.playing = false;
         super.complete();
     }
 
     bootstrap() {
-        var sprite;
+        this.load();
+        if (this.props.complete) this.complete();
+    }
+
+    load() {
+        let sprite = this.props.sprite ? {sprite: this.props.sprite} : undefined;
 
         this.sprite = this.props.sprite ? 'sprite' : undefined;
 
         if (this.audio) return;
 
-        if (this.props.sprite) {
-            sprite = {
-                sprite: this.props.sprite
-            };
-        }
-
         this.audio = new Howl({
-            // switch urls to src when moving to Howler ^2.0.0
-            urls: [].concat(this.props.src),
+            src: [].concat(this.props.src),
             format: [].concat(this.props.format),
             loop: this.props.loop,
             volume: this.props.volume,
@@ -147,8 +139,26 @@ class Audio extends Media {
             rate: this.props.rate,
             sprite,
         });
+    }
 
-        if (this.props.complete) this.complete();
+    unload() {
+        this.playing = false;
+        this.paused = false;
+        skoash.trigger('audioStop', {
+            audio: this
+        });
+
+        if (!this.audio) return;
+
+        _.invoke(this, 'audio.stop', this.sprite);
+        _.invoke(this, 'audio.unload');
+
+        delete this.audio;
+        this.setState({ready: this.props.ready || false});
+    }
+
+    componentWillUnmount() {
+        this.unload();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -173,6 +183,8 @@ Audio.defaultProps = _.defaults({
     shouldRender: false,
     sprite: undefined,
     allowMultiPlay: false,
+    unloadIndex: Infinity,
+    loadIndex: 0,
 }, Media.defaultProps);
 
 export default Audio;

@@ -57,6 +57,7 @@ class Video extends Media {
 
     bootstrap() {
         this.video = ReactDOM.findDOMNode(this);
+        this.video.load();
     }
 
     render() {

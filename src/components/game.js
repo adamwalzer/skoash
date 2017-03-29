@@ -24,15 +24,16 @@ class Game extends Component {
             loading: true,
             demo: false,
             data: {},
+            content: props.content,
             classes: [],
             screenLoads: {},
         };
 
         /* eslint-disable no-console */
-        console.warn(props.config);
+        console.log(props.config);
         /* eslint-enable no-console */
 
-        this.state.data.screens = _.map(props.screens, () => ({}));
+        this.state.data.screens = _.map(props.screens, () => ({}) );
 
         this.screensLength = Object.keys(props.screens).length;
 
@@ -225,6 +226,10 @@ class Game extends Component {
         if (props.screens && props.screens !== this.props.screens) {
             this.screensLength = Object.keys(props.screens).length;
         }
+
+        if (props.content && props.content !== this.props.content) {
+            this.setState({content: props.content});
+        }
     }
 
     getClassNames() {
@@ -260,15 +265,22 @@ class Game extends Component {
 
     renderScreens() {
         return _.map(Object.keys(this.props.screens), (key, index) => {
-            var props = this.props.screens[key].props || {};
-            props.data = this.state.data.screens[key];
-            props.load = this.state.screenLoads[key];
-            props.prevButtonClassName = _.isString(this.props.prevButtonClassName) ?
-                this.props.prevButtonClassName : this.props.prevButtonClassName[key];
-            props.nextButtonClassName = _.isString(this.props.nextButtonClassName) ?
-                this.props.nextButtonClassName : this.props.nextButtonClassName[key];
-            props.gameState = this.state;
-            props.index = index;
+            // data will eventually be removed from screen props
+            // in favor of passing it in as a param to the screen function
+            let data = this.state.data.screens[key];
+            let props = _.defaults({
+                data,
+                load: this.state.screenLoads[key],
+                prevButtonClassName: _.isString(this.props.prevButtonClassName) ?
+                    this.props.prevButtonClassName : this.props.prevButtonClassName[key],
+                nextButtonClassName: _.isString(this.props.nextButtonClassName) ?
+                    this.props.nextButtonClassName : this.props.nextButtonClassName[key],
+                // gameState will eventually be removed from screen props
+                // in favor of passing it in as a param to the screen function
+                gameState: this.state,
+                index,
+            }, this.props.screens[key].props);
+
             if (
                 !props.load &&
                 _.isNumber(_.parseInt(key)) &&
@@ -276,7 +288,15 @@ class Game extends Component {
             ) {
                 return null;
             }
-            return this.props.screens[key](props, 'screen-' + key, key);
+
+            return this.props.screens[key](
+                props,
+                `screen-${key}`,
+                key,
+                _.get(this, `state.content.screens.${key}`),
+                this.state,
+                data
+            );
         });
     }
 
@@ -287,7 +307,7 @@ class Game extends Component {
                 gameState={this.state}
                 key={key}
                 index={key}
-                ref={'menu-' + key}
+                ref={`menu-${key}`}
             />
         );
     }
@@ -311,8 +331,10 @@ Game.defaultProps = _.defaults({
     getBackgroundIndex: () => 0,
     passData: _.noop,
     screenBufferAmount: 3,
-    screens: {
-        0: function (props, ref, key) {
+    screens: [
+        /* eslint-disable no-unused-vars */
+        /* This is disabled to show the available params even though they're not being used */
+        function (props, ref, key, content, gameState, data) {
             return (
                 <Screen
                     {...props}
@@ -320,8 +342,9 @@ Game.defaultProps = _.defaults({
                     key={key}
                 />
             );
-        }
-    },
+        },
+        /* eslint-enable no-unused-vars */
+    ],
     menus: {
         Screen
     },

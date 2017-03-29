@@ -5,7 +5,6 @@ import Component from 'components/component';
 const AREA = 'area';
 const CONTENT = 'content';
 const HORIZONTAL = 'horizontal';
-const VERTICAL = 'vertical';
 
 class Slider extends Component {
     constructor(props) {
