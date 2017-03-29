@@ -2,11 +2,13 @@ class MediaManager {
     constructor(game) {
         this.audioPlay = this.audioPlay.bind(game);
         this.audioStop = this.audioStop.bind(game);
+        this.checkPlayingAudio = this.checkPlayingAudio.bind(game);
         this.videoPlay = this.videoPlay.bind(game);
         this.videoStop = this.videoStop.bind(game);
         this.fadeBackground = this.fadeBackground.bind(game);
         this.raiseBackground = this.raiseBackground.bind(game);
         this.playBackground = this.playBackground.bind(game);
+        this.loadUnloadMedia = this.loadUnloadMedia.bind(game);
     }
 
     audioPlay(opts) {
@@ -40,34 +42,23 @@ class MediaManager {
         });
     }
 
-    audioStop(opts) {
-        var playingSFX = this.state.playingSFX || [];
-        var playingVO = this.state.playingVO || [];
-        var playingBKG = this.state.playingBKG || [];
-        var index;
+    audioStop() {
+        this.mediaManager.checkPlayingAudio();
+    }
 
-        switch (opts.audio.props.type) {
-            case 'sfx':
-                index = playingSFX.indexOf(opts.audio);
-                index !== -1 && playingSFX.splice(index, 1);
-                break;
-            case 'voiceOver':
-                index = playingVO.indexOf(opts.audio);
-                index !== -1 && playingVO.splice(index, 1);
-                if (!playingVO.length) {
-                    this.mediaManager.raiseBackground();
-                }
-                break;
-            case 'background':
-                index = playingBKG.indexOf(opts.audio);
-                index !== -1 && playingBKG.splice(index, 1);
-                break;
-        }
+    checkPlayingAudio() {
+        let playingSFX = _.filter(this.state.playingSFX, sfx => sfx.playing);
+        let playingVO = _.filter(this.state.playingVO, vo => vo.playing);
+        let playingBKG = _.filter(this.state.playingBKG, bkg => bkg.playing);
 
         this.setState({
             playingSFX,
             playingVO,
             playingBKG,
+        }, () => {
+            if (!playingVO.length) {
+                this.mediaManager.raiseBackground();
+            }
         });
     }
 
@@ -127,6 +118,23 @@ class MediaManager {
         _.each(playingBKG, bkg => _.invoke(bkg, 'stop'));
 
         this.playMedia('audio.background.' + index);
+    }
+
+    loadUnloadMedia(currentScreenIndex) {
+        _.each(this.media.audio, mediaType => {
+            _.each(mediaType, media => {
+                if (!media || !media.props) return;
+
+                if (
+                    currentScreenIndex >= media.props.unloadIndex ||
+                    currentScreenIndex < media.props.loadIndex
+                ) {
+                    _.invoke(media, 'unload');
+                } else {
+                    _.invoke(media, 'load');
+                }
+            });
+        });
     }
 }
 
