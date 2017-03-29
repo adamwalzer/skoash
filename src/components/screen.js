@@ -18,22 +18,27 @@ class Screen extends Component {
 
         this.next = this.next.bind(this);
         this.prev = this.prev.bind(this);
+        this.loadHelper = this.loadHelper.bind(this);
+        this.unloadHelper = this.unloadHelper.bind(this);
+        this.startCallback = this.startCallback.bind(this);
+        this.startAfterOpen = this.startAfterOpen.bind(this);
+        this.openHelper = this.openHelper.bind(this);
     }
 
     goto(index, buttonSound) {
         if (typeof index === 'string' || typeof index === 'number') {
-            skoash.trigger('goto', {
+            this.trigger('goto', {
                 index,
                 buttonSound
             });
         } else if (typeof index === 'object') {
             index.buttonSound = index.buttonSound || buttonSound;
-            skoash.trigger('goto', index);
+            this.trigger('goto', index);
         }
     }
 
     back() {
-        skoash.trigger('goBack');
+        this.trigger('goBack');
     }
 
     next() {
@@ -56,6 +61,11 @@ class Screen extends Component {
         this.goto(this.props.prevIndex || this.props.index - 1);
     }
 
+    loadHelper() {
+        super.bootstrap();
+        this.props.onLoad.call(this);
+    }
+
     load(cb) {
         this.onReadyCallback = cb;
         if (!this.state.load) {
@@ -63,23 +73,22 @@ class Screen extends Component {
                 load: true,
                 ready: false,
                 complete: false,
-            }, () => {
-                super.bootstrap();
-                this.props.onLoad.call(this);
-            });
+            }, this.loadHelper);
         } else {
             _.invoke(this, 'onReadyCallback.call', this);
             this.onReadyCallback = null;
         }
     }
 
+    unloadHelper() {
+        this.props.onUnload.call(this);
+    }
+
     unload() {
         if (this.state.load && this.props.shouldUnload) {
             this.setState({
                 load: false,
-            }, () => {
-                this.props.onUnload.call(this);
-            });
+            }, this.unloadHelper);
         }
     }
 
@@ -96,11 +105,13 @@ class Screen extends Component {
         });
     }
 
+    startCallback() {
+        this.bootstrap();
+        this.startMedia();
+    }
+
     start() {
-        super.start(() => {
-            this.bootstrap();
-            this.startMedia();
-        });
+        super.start(this.startCallback);
     }
 
     startMedia() {
@@ -117,7 +128,7 @@ class Screen extends Component {
     complete(opts = {}) {
         super.complete(opts);
         setTimeout(() => {
-            skoash.trigger('screenComplete', {
+            this.trigger('screenComplete', {
                 screenID: this.props.id,
                 silent: opts.silent || this.props.silentComplete || this.media['screen-complete']
             });
@@ -125,42 +136,44 @@ class Screen extends Component {
             this.playMedia('screen-complete');
 
             if (this.props.emitOnComplete) {
-                skoash.trigger('emit', this.props.emitOnComplete);
+                this.trigger('emit', this.props.emitOnComplete);
             }
         }, this.props.completeDelay);
     }
 
-    open(opts) {
-        var self = this;
+    startAfterOpen() {
+        if (!this.state.started) this.start();
+        this.setState({
+            opening: false
+        });
+    }
 
-        self.setState({
+    openHelper() {
+        if (this.props.startDelay) {
+            setTimeout(this.startAfterOpen, this.props.startDelay);
+        } else {
+            if (!this.state.started) this.start();
+            this.setState({
+                opening: false
+            });
+        }
+
+        this.props.onOpen.call(this);
+
+        this.loadData();
+    }
+
+    open(opts) {
+        this.setState({
             load: true,
             open: true,
             opening: true,
             leaving: false,
             leave: false,
             close: false,
-            replay: self.state.complete || self.state.replay,
+            replay: this.state.complete || this.state.replay,
             opts,
-        }, () => {
-            if (self.props.startDelay) {
-                setTimeout(() => {
-                    if (!self.state.started) self.start();
-                    self.setState({
-                        opening: false
-                    });
-                }, self.props.startDelay);
-            } else {
-                if (!self.state.started) self.start();
-                self.setState({
-                    opening: false
-                });
-            }
-
-            self.props.onOpen.call(self);
-
-            self.loadData();
-        });
+        }, this.openHelper);
     }
 
     leave() {

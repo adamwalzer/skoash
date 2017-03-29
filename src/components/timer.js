@@ -11,7 +11,20 @@ class Timer extends Component {
             stamp: 0
         };
 
+        this.increment = this.increment.bind(this);
         this.checkComplete = this.checkComplete.bind(this);
+        this.restartHelper = this.restartHelper.bind(this);
+    }
+
+    increment() {
+        if (this.state.time >= this.props.timeout) {
+            this.complete();
+            this.stop();
+        } else {
+            this.props.onCheckComplete.call(this);
+            window.requestAnimationFrame(this.checkComplete);
+        }
+        this.props.onIncrement.call(this);
     }
 
     checkComplete() {
@@ -25,18 +38,7 @@ class Timer extends Component {
             this.setState({
                 stamp: time + 1000,
                 time: this.state.time + 1000
-            }, () => {
-                if (this.state.time >= this.props.timeout) {
-                    this.complete();
-                    this.stop();
-                } else {
-                    if (typeof this.props.onCheckComplete === 'function') {
-                        this.props.onCheckComplete.call(this);
-                    }
-                    window.requestAnimationFrame(this.checkComplete);
-                }
-                this.props.onIncrement.call(this);
-            });
+            }, this.increment);
         } else {
             window.requestAnimationFrame(this.checkComplete);
         }
@@ -46,6 +48,14 @@ class Timer extends Component {
         this.restart();
     }
 
+    restartHelper() {
+        if (this.state.started) {
+            this.checkComplete();
+        } else {
+            this.start();
+        }
+    }
+
     restart() {
         if (!this.state.ready) return;
         if (this.state.complete) this.incomplete();
@@ -53,13 +63,7 @@ class Timer extends Component {
         this.setState({
             time: 0,
             stamp: 0,
-        }, () => {
-            if (this.state.started) {
-                this.checkComplete();
-            } else {
-                this.start();
-            }
-        });
+        }, this.restartHelper);
     }
 
     stop() {
@@ -81,13 +85,7 @@ class Timer extends Component {
         if (props.pause || !this.state.paused) return;
         this.setState({
             paused: false
-        }, () => {
-            if (this.state.started) {
-                this.checkComplete();
-            } else {
-                this.start();
-            }
-        });
+        }, this.restartHelper);
     }
 
     componentWillReceiveProps(props) {
@@ -133,6 +131,7 @@ Timer.defaultProps = _.defaults({
     leadingContent: '',
     timeout: 60000,
     countDown: false,
+    onCheckComplete: _.noop,
     onIncrement: _.noop,
 }, Component.defaultProps);
 

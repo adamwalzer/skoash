@@ -11,6 +11,12 @@ class SpriteCss extends Component {
         }, this.state);
 
         this.onJSONReady = this.onJSONReady.bind(this);
+        this.postSetUp = this.postSetUp.bind(this);
+        this.minXHelper = this.minXHelper.bind(this);
+        this.minYHelper = this.minYHelper.bind(this);
+        this.maxWidthsHelper = this.maxWidthsHelper.bind(this);
+        this.maxHeightsHelper = this.maxHeightsHelper.bind(this);
+        this.styleTextHelper = this.styleTextHelper.bind(this);
     }
 
     onJSONReady() {
@@ -18,64 +24,80 @@ class SpriteCss extends Component {
         this.setUp();
     }
 
+    postSetUp() {
+        this.props.onSetUp.call(this);
+    }
+
+    minXHelper(a, v, k) {
+        let i = Math.floor(k / this.spriteGroup);
+        let curr = i >= a.length ? Infinity : a[i];
+        a[i] = Math.min(curr, v.spriteSourceSize.x);
+        return a;
+    }
+
+    minYHelper(a, v, k) {
+        let i = Math.floor(k / this.spriteGroup);
+        let curr = i >= a.length ? Infinity : a[i];
+        a[i] = Math.min(curr, v.spriteSourceSize.y);
+        return a;
+    }
+
+    maxWidthsHelper(a, v, k) {
+        let i = Math.floor(k / this.spriteGroup);
+        let curr = i >= a.length ? 0 : a[i];
+        a[i] = Math.max(curr, v.spriteSourceSize.x + v.spriteSourceSize.w - this.minXs[i]);
+        return a;
+    }
+
+    maxHeightsHelper(a, v, k) {
+        let i = Math.floor(k / this.spriteGroup);
+        let curr = i >= a.length ? 0 : a[i];
+        a[i] = Math.max(curr, v.spriteSourceSize.y + v.spriteSourceSize.h - this.minYs[i]);
+        return a;
+    }
+
+    styleTextHelper(text, frameData, k) {
+        return (
+            text +
+            `.${this.props.spriteClass}` +
+            `${(this.props.frameSelectors[k] || `.frame-${k}`)} {` +
+            `width: ${this.maxWidths[Math.floor(k / this.spriteGroup)]}px;` +
+            `height: ${this.maxHeights[Math.floor(k / this.spriteGroup)]}px;` +
+            '}' +
+            `.${this.props.spriteClass}` +
+            `${(this.props.frameSelectors[k] || `.frame-${k}`) + '::before'} {` +
+            'position: absolute;' +
+            `top: ${frameData.spriteSourceSize.y - this.minYs[Math.floor(k / this.spriteGroup)]}px;` +
+            `left: ${frameData.spriteSourceSize.x - this.minXs[Math.floor(k / this.spriteGroup)]}px;` +
+            `background-image: url(${this.props.src}.${this.props.extension});` +
+            'background-repeat: no-repeat;' +
+            `background-position: -${frameData.frame.x}px -${frameData.frame.y}px;` +
+            `background-size: ${this.data.meta.size.w}px ${this.data.meta.size.h}px;` +
+            `width: ${frameData.frame.w}px;` +
+            `height: ${frameData.frame.h}px;` +
+            'content: \'\';' +
+            '}'
+        );
+    }
+
     setUp() {
         if (this.data && this.data.frames) {
-            let spriteGroup = Math.min(this.props.spriteGroup, this.data.frames.length);
-            let minXs = _.reduce(this.data.frames, (a, v, k) => {
-                let i = Math.floor(k / spriteGroup);
-                let curr = i >= a.length ? Infinity : a[i];
-                a[i] = Math.min(curr, v.spriteSourceSize.x);
-                return a;
-            }, []);
-            let minYs = _.reduce(this.data.frames, (a, v, k) => {
-                let i = Math.floor(k / spriteGroup);
-                let curr = i >= a.length ? Infinity : a[i];
-                a[i] = Math.min(curr, v.spriteSourceSize.y);
-                return a;
-            }, []);
-            let maxWidths = _.reduce(this.data.frames, (a, v, k) => {
-                let i = Math.floor(k / spriteGroup);
-                let curr = i >= a.length ? 0 : a[i];
-                a[i] = Math.max(curr, v.spriteSourceSize.x + v.spriteSourceSize.w - minXs[i]);
-                return a;
-            }, []);
-            let maxHeights = _.reduce(this.data.frames, (a, v, k) => {
-                let i = Math.floor(k / spriteGroup);
-                let curr = i >= a.length ? 0 : a[i];
-                a[i] = Math.max(curr, v.spriteSourceSize.y + v.spriteSourceSize.h - minYs[i]);
-                return a;
-            }, []);
+            let styleText;
 
-            let styleText = `.${this.props.spriteClass}` +
+            this.spriteGroup = Math.min(this.props.spriteGroup, this.data.frames.length);
+            this.minXs = _.reduce(this.data.frames, this.minXHelper, []);
+            this.minYs = _.reduce(this.data.frames, this.minYHelper, []);
+            this.maxWidths = _.reduce(this.data.frames, this.maxWidthsHelper, []);
+            this.maxHeights = _.reduce(this.data.frames, this.maxHeightsHelper, []);
+
+            styleText = `.${this.props.spriteClass}` +
                 '{ display: inline-block; position: relative; }';
 
-            styleText = _.reduce(this.data.frames, (text, frameData, k) =>
-                text +
-                `.${this.props.spriteClass}` +
-                `${(this.props.frameSelectors[k] || `.frame-${k}`)} {` +
-                `width: ${maxWidths[Math.floor(k / spriteGroup)]}px;` +
-                `height: ${maxHeights[Math.floor(k / spriteGroup)]}px;` +
-                '}' +
-                `.${this.props.spriteClass}` +
-                `${(this.props.frameSelectors[k] || `.frame-${k}`) + '::before'} {` +
-                'position: absolute;' +
-                `top: ${frameData.spriteSourceSize.y - minYs[Math.floor(k / spriteGroup)]}px;` +
-                `left: ${frameData.spriteSourceSize.x - minXs[Math.floor(k / spriteGroup)]}px;` +
-                `background-image: url(${this.props.src}.${this.props.extension});` +
-                'background-repeat: no-repeat;' +
-                `background-position: -${frameData.frame.x}px -${frameData.frame.y}px;` +
-                `background-size: ${this.data.meta.size.w}px ${this.data.meta.size.h}px;` +
-                `width: ${frameData.frame.w}px;` +
-                `height: ${frameData.frame.h}px;` +
-                'content: \'\';' +
-                '}'
-            , styleText);
+            styleText = _.reduce(this.data.frames, this.styleTextHelper, styleText);
 
             this.setState({
                 styleText
-            }, () => {
-                this.props.onSetUp.call(this);
-            });
+            }, this.postSetUp);
         }
     }
 

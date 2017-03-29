@@ -7,25 +7,29 @@ class Audio extends Media {
 
         this.allowMultiPlay = props.allowMultiPlay || props.type === 'sfx';
 
-        this.playAudio = this.playAudio.bind(this);
         this.play = _.throttle(this.play.bind(this), props.playThrottle);
+        this.playHelper = this.playHelper.bind(this);
+        this.playAudio = this.playAudio.bind(this);
+        this.resumeHelper = this.resumeHelper.bind(this);
+    }
+
+    playHelper(state) {
+        if (!this.state.ready) {
+            this.bootstrap();
+        } else {
+            this.trigger('audioPlay', {
+                audio: this
+            });
+            this.delayed = true;
+
+            if (!state.paused) {
+                this.timeout = setTimeout(this.playAudio, this.props.delay);
+            }
+        }
     }
 
     play() {
-        skoash.trigger('getState').then(state => {
-            if (!this.state.ready) {
-                this.bootstrap();
-            } else {
-                skoash.trigger('audioPlay', {
-                    audio: this
-                });
-                this.delayed = true;
-
-                if (!state.paused) {
-                    this.timeout = setTimeout(this.playAudio, this.props.delay);
-                }
-            }
-        });
+        this.trigger('getState').then(this.playHelper);
     }
 
     playAudio(resume) {
@@ -49,21 +53,23 @@ class Audio extends Media {
         this.paused = true;
     }
 
+    resumeHelper(state) {
+        if (state.paused) return;
+
+        if (this.delayed) {
+            this.timeout = setTimeout(
+                this.playAudio,
+                this.props.delay
+            );
+        }
+
+        if (!this.paused) return;
+        this.paused = false;
+        this.playAudio(true);
+    }
+
     resume() {
-        skoash.trigger('getState').then(state => {
-            if (state.paused) return;
-
-            if (this.delayed) {
-                this.timeout = setTimeout(
-                    this.playAudio,
-                    this.props.delay
-                );
-            }
-
-            if (!this.paused) return;
-            this.paused = false;
-            this.playAudio(true);
-        });
+        this.trigger('getState').then(this.resumeHelper);
     }
 
     stop() {
@@ -79,7 +85,7 @@ class Audio extends Media {
 
         _.invoke(this, 'audio.stop', this.sprite);
 
-        skoash.trigger('audioStop', {
+        this.trigger('audioStop', {
             audio: this
         });
     }
@@ -107,7 +113,7 @@ class Audio extends Media {
 
         if (!props.loop) {
             this.playing = false;
-            skoash.trigger('audioStop', {
+            this.trigger('audioStop', {
                 audio: this
             });
         }
@@ -144,7 +150,7 @@ class Audio extends Media {
     unload() {
         this.playing = false;
         this.paused = false;
-        skoash.trigger('audioStop', {
+        this.trigger('audioStop', {
             audio: this
         });
 

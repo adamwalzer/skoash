@@ -7,21 +7,25 @@ class Data extends Component {
 
         this.state.ready = false;
 
+        this.loadDataHelper = this.loadDataHelper.bind(this);
+
         this.loadFile = util.loadFile;
         this.loadData(props.src);
     }
 
+    loadDataHelper(data) {
+        this.data = data;
+        this.ready();
+        if (this.props.dataTarget) {
+            this.updateGameData({
+                key: this.props.dataTarget,
+                data,
+            });
+        }
+    }
+
     loadData(src) {
-        this.loadFile(src, data => {
-            this.data = data;
-            this.ready();
-            if (this.props.dataTarget) {
-                this.updateGameData({
-                    key: this.props.dataTarget,
-                    data,
-                });
-            }
-        });
+        this.loadFile(src, this.loadDataHelper);
     }
 
     getData() {
