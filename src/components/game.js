@@ -352,7 +352,10 @@ Game.defaultProps = _.defaults({
     renderMenu: function () {
         return (
             <div className="menu">
-                <button className="close" onClick={this.navigator.openMenu.bind(this, {id: 'quit'})} />
+                <button
+                    className={classNames('navigation', 'close', this.props.closeButtonClassName)}
+                    onClick={this.navigator.openMenu.bind(this, {id: 'quit'})}
+                />
             </div>
         );
     },
