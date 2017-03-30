@@ -1,10 +1,15 @@
-import Media from './media.js';
+import Media from './media';
 
 class Video extends Media {
     constructor(props) {
         super(props);
 
         this.play = this.play.bind(this);
+        this.setDevice = this.setDevice.bind(this);
+        this.onTimeUpdate = this.onTimeUpdate.bind(this);
+        this.onSeeking = this.onSeeking.bind(this);
+        this.onEnded = this.onEnded.bind(this);
+        this.onClick = this.onClick.bind(this);
     }
 
     play() {
@@ -13,7 +18,7 @@ class Video extends Media {
         * In order for videos to play on mobile devices,
         * the screen must have prop.startDelay=0
         */
-        this.video.play();
+        _.invoke(this, 'video.play');
         super.play();
         skoash.trigger('videoPlay', {
             video: this
@@ -27,7 +32,7 @@ class Video extends Media {
     }
 
     stop() {
-        this.video.pause();
+        _.invoke(this, 'video.pause');
         skoash.trigger('videoStop', {
             video: this
         });
@@ -35,7 +40,7 @@ class Video extends Media {
     }
 
     pause() {
-        this.video.pause();
+        _.invoke(this, 'video.pause');
         this.paused = true;
     }
 
@@ -44,6 +49,7 @@ class Video extends Media {
     }
 
     complete() {
+        console.log('complete');
         if (!this.props.loop) {
             skoash.trigger('videoStop', {
                 video: this
@@ -55,12 +61,83 @@ class Video extends Media {
         super.complete();
     }
 
+    onClick() {
+        var cns = console;
+        var popup = window.open(this.props.popup);
+        cns.log('onClick');
+        popup.onload = function () {
+            cns.log('onload');
+        };
+
+        setTimeout(() => {
+            popup.document.getElementById('video').onended = this.complete;
+        }, 1000);
+
+        window.popup = this.popup;
+    }
+
+    setDevice(gameState) {
+        this.mobile = gameState.mobile;
+        // this.iOS = gameState.iOS;
+        this.iOS = true;
+
+        this.setState({ready: true});
+        this.forceUpdate();
+    }
+
+    componentWillMount() {
+        skoash.trigger('getState').then(this.setDevice);
+    }
+
+    onTimeUpdate() {
+        if (!this.video.seeking) {
+            this.currentTime = this.video.currentTime || 0;
+        }
+    }
+
+    onSeeking() {
+        let delta = this.video.currentTime - this.currentTime;
+        if (delta > 0) {
+            this.video.currentTime = this.currentTime || 0;
+        }
+    }
+
+    onEnded() {
+        this.currentTime = 0;
+    }
+
     bootstrap() {
         this.video = ReactDOM.findDOMNode(this);
-        this.video.load();
+        _.invoke(this, 'video.load');
+
+        if (!this.props.allowSeeking) {
+            this.currentTime = 0;
+            this.video.addEventListener('timeupdate', this.onTimeUpdate);
+            this.video.addEventListener('seeking', this.onSeeking);
+            this.video.addEventListener('ended', this.onEnded);
+        }
+    }
+
+    componentWillUnmount() {
+        if (!this.props.allowSeeking) {
+            this.video.removeEventListener('timeupdate', this.onTimeUpdate);
+            this.video.removeEventListener('seeking', this.onSeeking);
+            this.video.removeEventListener('ended', this.onEnded);
+        }
     }
 
     render() {
+        if (this.iOS !== false) {
+            return (
+                <div
+                    className="video-placeholder"
+                    onClick={this.onClick}
+                >
+                    {this.props.copy}
+                </div>
+            );
+        }
+
         return (
             <video
                 {...this.props}
@@ -72,5 +149,11 @@ class Video extends Media {
         );
     }
 }
+
+Video.defaultProps = _.defaults({
+    popup: 'video.html',
+    copy: 'Click here to view video!',
+    allowSeeking: false,
+}, Media.defaultProps);
 
 export default Video;
