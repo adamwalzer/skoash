@@ -128,6 +128,7 @@ class Video extends Media {
     }
 
     componentWillUnmount() {
+        if (!this.video) return;
         if (!this.props.allowSeeking) {
             this.video.removeEventListener('timeupdate', this.onTimeUpdate);
             this.video.removeEventListener('seeking', this.onSeeking);

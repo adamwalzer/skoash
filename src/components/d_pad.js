@@ -30,18 +30,22 @@ class DPad extends Component {
     }
 
     mousedown(e) {
+        if (!this.state.started) return;
         this.updateRef(e.target.getAttribute('data-ref'));
     }
 
     mouseup(e) {
+        if (!this.state.started) return;
         this.updateRef(e.target.getAttribute('data-ref'), false);
     }
 
     keydown(e) {
+        if (!this.state.started) return;
         this.keyaction(e, true);
     }
 
     keyup(e) {
+        if (!this.state.started) return;
         this.keyaction(e, false);
     }
 
