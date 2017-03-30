@@ -4,6 +4,7 @@ class Video extends Media {
     constructor(props) {
         super(props);
 
+        this.bootstrap = this.bootstrap.bind(this);
         this.play = this.play.bind(this);
         this.setDevice = this.setDevice.bind(this);
         this.onTimeUpdate = this.onTimeUpdate.bind(this);
@@ -15,12 +16,13 @@ class Video extends Media {
     }
 
     play() {
+        if (!this.video) return;
         if (this.playing && !this.paused) return;
         /*
         * In order for videos to play on mobile devices,
         * the screen must have prop.startDelay=0
         */
-        _.invoke(this, 'video.play');
+        this.video.play();
         super.play();
         skoash.trigger('videoPlay', {
             video: this
@@ -34,7 +36,8 @@ class Video extends Media {
     }
 
     stop() {
-        _.invoke(this, 'video.pause');
+        if (!this.video) return;
+        this.video.pause();
         skoash.trigger('videoStop', {
             video: this
         });
@@ -42,7 +45,8 @@ class Video extends Media {
     }
 
     pause() {
-        _.invoke(this, 'video.pause');
+        if (!this.video) return;
+        this.video.pause();
         this.paused = true;
     }
 
@@ -84,7 +88,7 @@ class Video extends Media {
         this.iOS = gameState.iOS;
 
         this.setState({ready: true});
-        this.forceUpdate();
+        this.forceUpdate(this.bootstrap);
     }
 
     componentWillMount() {
@@ -109,8 +113,11 @@ class Video extends Media {
     }
 
     bootstrap() {
-        this.video = ReactDOM.findDOMNode(this);
-        _.invoke(this, 'video.load');
+        this.video = ReactDOM.findDOMNode(this.refs.video);
+
+        if (!this.video) return;
+
+        this.video.load();
 
         if (!this.props.allowSeeking) {
             this.currentTime = 0;
@@ -143,6 +150,7 @@ class Video extends Media {
         return (
             <video
                 {...this.props}
+                ref="video"
                 onCanPlay={this.ready}
                 onEnded={this.complete}
                 preload="auto"
