@@ -10,6 +10,8 @@ class Video extends Media {
         this.onSeeking = this.onSeeking.bind(this);
         this.onEnded = this.onEnded.bind(this);
         this.onClick = this.onClick.bind(this);
+        this.attachOnEnded = this.attachOnEnded.bind(this);
+        this.attachOnEndedHelper = this.attachOnEndedHelper.bind(this);
     }
 
     play() {
@@ -49,7 +51,6 @@ class Video extends Media {
     }
 
     complete() {
-        console.log('complete');
         if (!this.props.loop) {
             skoash.trigger('videoStop', {
                 video: this
@@ -62,24 +63,25 @@ class Video extends Media {
     }
 
     onClick() {
-        var cns = console;
-        var popup = window.open(this.props.popup);
-        cns.log('onClick');
-        popup.onload = function () {
-            cns.log('onload');
-        };
+        this.popup = window.open(this.props.popup);
+        this.attachOnEnded();
+    }
 
-        setTimeout(() => {
-            popup.document.getElementById('video').onended = this.complete;
-        }, 1000);
+    attachOnEnded() {
+        setTimeout(this.attachOnEndedHelper, 1000);
+    }
 
-        window.popup = this.popup;
+    attachOnEndedHelper() {
+        try {
+            this.popup.document.getElementById('video').onended = this.complete;
+        } catch(err) {
+            this.attachOnEnded();
+        }
     }
 
     setDevice(gameState) {
         this.mobile = gameState.mobile;
-        // this.iOS = gameState.iOS;
-        this.iOS = true;
+        this.iOS = gameState.iOS;
 
         this.setState({ready: true});
         this.forceUpdate();
