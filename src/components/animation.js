@@ -2,8 +2,6 @@ import classNames from 'classnames';
 
 import Component from 'components/component';
 
-var blah;
-
 class Animation extends Component {
     constructor(props) {
         super(props);
