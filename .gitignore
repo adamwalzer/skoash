@@ -4,3 +4,4 @@ build
 **/*.swp
 .DS_Store
 NOTES.txt
+scsslint.json
