@@ -166,7 +166,7 @@ gulp.task('webpack:build-dev', ['build-warning'], buildDevelopment);
 gulp.task('webpack:build-development', ['build-warning'], buildDevelopment);
 
 /*·.·´`·.·•·.·´`·.·•·.·´`·.·•·.·´Lint and Testing Tasks`·.·•·.·´`·.·•·.·´`·.·•·.·´`·.·•·.·´`·.·*/
-gulp.task('lint', ['lint-js', 'lint-config', 'lint-test']);
+gulp.task('lint', ['lint-js']);
 gulp.task('lint-js', function () {
     return gulp.src(['src/**/*.js', '!src/**/*.test.js'])
         // eslint() attaches the lint output to the eslint property
