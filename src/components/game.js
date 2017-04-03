@@ -258,10 +258,12 @@ class Game extends Component {
     }
 
     getStyles() {
-        var transform = `scale3d(${this.state.scale},${this.state.scale},1)`;
-        var transformOrigin = this.state.scale < 1 ? '0px 0px 0px' : '50% 0px 0px';
+        let display = this.state.scale ? 'block' : 'none';
+        let transform = `scale3d(${this.state.scale},${this.state.scale},1)`;
+        let transformOrigin = this.state.scale < 1 ? '0px 0px 0px' : '50% 0px 0px';
 
         return {
+            display,
             transform,
             WebkitTransform: transform,
             transformOrigin,
