@@ -87,7 +87,10 @@ class Video extends Media {
         this.mobile = gameState.mobile;
         this.iOS = gameState.iOS;
 
-        this.setState({ready: true});
+        if (this.iOS) {
+            this.setState({ready: true});
+        }
+
         this.forceUpdate(this.bootstrap);
     }
 
